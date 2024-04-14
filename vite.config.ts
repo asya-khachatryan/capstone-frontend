@@ -11,4 +11,13 @@ export default defineConfig({
     host: true,
     port: 3000,
   },
+  
+  resolve: {
+    alias: {
+      "@api": "/src/api",
+      "@components": "/src/components",
+      "@redux": "/src/redux",
+      "@pages": "/src/pages",
+    },
+  },
 })

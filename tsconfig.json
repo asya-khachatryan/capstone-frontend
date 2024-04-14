@@ -23,7 +23,14 @@
     "types": [
       "vitest/globals",
       "@testing-library/jest-dom"
-    ]
+    ],
+    "baseUrl": "./src",
+    "paths": {
+      "@api/*": ["api/*"],
+      "@components/*": ["components/*"],
+      "@redux/*": ["redux/*"],
+      "@pages/*": ["pages/*"]
+    }
   },
   "include": [
     "tailwind.config.js",
