@@ -16,7 +16,7 @@ const JobApplicationForm: React.FC = () => {
     surname: '',
     email: '',
     phoneNumber: '',
-    specializationId: '',
+    specializationId: 0,
     cv: null as File | null,
   });
 
@@ -67,7 +67,7 @@ const JobApplicationForm: React.FC = () => {
       surname: '',
       email: '',
       phoneNumber: '',
-      specializationId: '',
+      specializationId: 0,
       cv: null,
     });
   };
@@ -175,6 +175,7 @@ const JobApplicationForm: React.FC = () => {
             createPortal(
               <Modal
                 closeModal={handleCloseModal}
+                size="lg"
               >
                 <h1>This is a modal</h1>
                 <br />

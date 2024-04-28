@@ -18,6 +18,7 @@ export default defineConfig({
       "@components": "/src/components",
       "@redux": "/src/redux",
       "@pages": "/src/pages",
+      "@hooks": "/src/hooks",
     },
   },
 })

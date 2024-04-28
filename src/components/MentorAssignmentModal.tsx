@@ -8,7 +8,7 @@ interface ModalProps {
     size: any
 }
 
-const Modal: React.FC<ModalProps> = ({ closeModal, children, size }) => {
+const MentorAssignmentModal: React.FC<ModalProps> = ({ closeModal, children, size }) => {
 
     const handleOpen = (value: any) => size = value;
 
@@ -54,4 +54,4 @@ const Modal: React.FC<ModalProps> = ({ closeModal, children, size }) => {
     );
 }
 
-export default Modal;
+export default MentorAssignmentModal;

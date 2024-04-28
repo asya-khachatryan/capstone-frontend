@@ -9,6 +9,7 @@ import talentReducer from '@redux/talentSlice'
 
 import { docsApi } from './services/docs'
 import authReducer from './redux/authSlice'
+import onboardingReducer from "@redux/onboardingSlice"
 
 // Setup redux-first-history
 const { createReduxHistory, routerMiddleware, routerReducer } =
@@ -21,6 +22,7 @@ export const store = configureStore({
     auth: authReducer,
     specialization: specializationReducer,
     talent: talentReducer,
+    onboarding: onboardingReducer,
     router: routerReducer,
     [docsApi.reducerPath]: docsApi.reducer,
   }),

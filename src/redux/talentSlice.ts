@@ -1,12 +1,13 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import apiService from '@api/service'
+import { Specialization } from './specializationSlice';
 
 export interface TalentRequestDTO {
     name: string,
     surname: string,
     email: string,
     phoneNumber: string,
-    specializationId: string,
+    specializationId: number,
     status?: string
 }
 
@@ -16,27 +17,42 @@ export interface TalentResponseDTO {
     surname: string,
     email: string,
     phoneNumber: string,
-    specializationId: string,
+    specialization: Specialization,
     status: string
 }
 
 interface TalentState {
     isLoading: boolean,
-    talent?: TalentRequestDTO
+    talents: TalentResponseDTO[],
+    interviewees: TalentResponseDTO[]
 }
 
 const initialState: TalentState = {
     isLoading: false,
-    talent: undefined
+    talents: [],
+    interviewees: []
 };
 
-export const createTalent = createAsyncThunk(
-    'createTalentAsync',
-    async ({ name, surname, email, phoneNumber, specializationId, status }: any) => {
-        const talent: TalentRequestDTO = {
-            name, surname, email, phoneNumber, specializationId, status
-        }
-        const response = await apiService.createTalent(talent);
+export const getTalents = createAsyncThunk(
+    'talents',
+    async () => {
+        const response = await apiService.getTalents();
+        return response;
+    }
+);
+
+export const getInterviewees = createAsyncThunk(
+    'interviewees',
+    async () => {
+        const response = await apiService.getInterviewees();
+        return response;
+    }
+);
+
+export const searchTalents = createAsyncThunk(
+    'searchTalents',
+    async ({ query }: any) => {
+        const response = await apiService.searchTalents(query);
         return response;
     }
 );
@@ -48,13 +64,22 @@ const talentsSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(createTalent.pending, (state) => {
+            .addCase(getTalents.pending, (state) => {
                 state.isLoading = true
             })
-            .addCase(createTalent.fulfilled, (state, action) => {
-                state.talent = action.payload;
+            .addCase(getTalents.fulfilled, (state, action) => {
+                state.talents = action.payload;
             })
-            .addCase(createTalent.rejected, (state, action) => {
+            .addCase(getTalents.rejected, (state, action) => {
+
+            })
+            .addCase(getInterviewees.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(getInterviewees.fulfilled, (state, action) => {
+                state.interviewees = action.payload;
+            })
+            .addCase(getInterviewees.rejected, (state, action) => {
 
             });
     },

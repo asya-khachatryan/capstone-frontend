@@ -1,13 +1,30 @@
+import { FlagIcon } from '@heroicons/react/24/outline';
+import { Typography, Button } from '@material-tailwind/react';
 import { Link } from 'react-router-dom';
 
 const NotFoundPage: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100">
-      <h1 className="text-4xl font-bold text-gray-800 mb-4">404 - Page Not Found</h1>
-      <p className="text-lg text-gray-600 mb-8">The page you are looking for could not be found.</p>
-      <Link to="/" className="text-indigo-500 hover:text-indigo-700">
-        Go back to Home
-      </Link>
+    <div className="h-screen mx-auto grid place-items-center text-center px-8">
+      <div>
+        <FlagIcon className="w-20 h-20 mx-auto" />
+        <Typography
+          variant="h1"
+          color="blue-gray"
+          className="mt-10 !text-3xl !leading-snug md:!text-4xl"
+          placeholder={undefined}
+        >
+          Error 404 <br /> It looks like something went wrong.
+        </Typography>
+        <Typography className="mt-8 mb-14 text-[18px] font-normal text-gray-500 mx-auto md:max-w-sm" placeholder={undefined}
+        >
+          Don&apos;t worry, our team is already on it.Please try refreshing
+          the page or come back later.
+        </Typography>
+        <Button color="gray" className="w-full px-4 md:w-[8rem]" placeholder={undefined}
+        >
+          back home
+        </Button>
+      </div>
     </div>
   );
 };

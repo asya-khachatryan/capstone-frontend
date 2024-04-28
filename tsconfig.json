@@ -29,7 +29,8 @@
       "@api/*": ["api/*"],
       "@components/*": ["components/*"],
       "@redux/*": ["redux/*"],
-      "@pages/*": ["pages/*"]
+      "@pages/*": ["pages/*"],
+      "@hooks/*": ["hooks/*"]
     }
   },
   "include": [

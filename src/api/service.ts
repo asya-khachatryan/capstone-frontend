@@ -1,7 +1,8 @@
 import ky from 'ky';
 import { UserDTO, Credentials, UserProfileDTO } from '@redux/authSlice';
 import { Specialization } from '@redux/specializationSlice';
-import { TalentRequestDTO, TalentResponseDTO} from '@redux/talentSlice';
+import { TalentRequestDTO, TalentResponseDTO } from '@redux/talentSlice';
+import { MenteeDto, MentorDto } from '@redux/onboardingSlice';
 
 
 class ApiService {
@@ -39,7 +40,23 @@ class ApiService {
     }
 
     getTalents() {
-        return ky.get(`${this.server_domain_endpoint}/talent`).json<TalentRequestDTO[]>();
+        return ky.get(`${this.server_domain_endpoint}/talent`).json<TalentResponseDTO[]>();
+    }
+
+    searchTalents(query: string) {
+        return ky.get(`${this.server_domain_endpoint}/talent/search?query=${query}`).json<TalentResponseDTO[]>();
+    }
+
+    getInterviewees() {
+        return ky.get(`${this.server_domain_endpoint}/talent/interviewees`).json<TalentResponseDTO[]>();
+    }
+
+    getMentees() {
+        return ky.get(`${this.server_domain_endpoint}/user/mentee`).json<MenteeDto[]>();
+    }
+
+    getMentors() {
+        return ky.get(`${this.server_domain_endpoint}/user/mentor`).json<MentorDto[]>();
     }
 
     createTalent(talent: TalentRequestDTO) {
@@ -60,6 +77,10 @@ class ApiService {
         ).json<TalentRequestDTO>();
     }
 
+    getCV(fileName: string) {
+        return ky.get(`${this.server_domain_endpoint}/download/${fileName}`
+        ).json<TalentRequestDTO>();
+    }
 
 }
 
