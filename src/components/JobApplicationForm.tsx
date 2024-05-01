@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
-import { Specialization, callSpecializations } from '../redux/specializationSlice';
+import { Specialization, getSpecializations } from '../redux/specializationSlice';
 import { RootState } from '../store';
 import { createPortal } from "react-dom";
 import Modal from "../components/Modal"
@@ -26,7 +26,7 @@ const JobApplicationForm: React.FC = () => {
 
   useEffect(() => {
     if (specializations.length === 0) {
-      dispatch(callSpecializations())
+      dispatch(getSpecializations())
       console.log(specializations)
     }
     console.log(specializations)
@@ -123,7 +123,7 @@ const JobApplicationForm: React.FC = () => {
               disabled={isDisabled}
             />
           </div>
-          {/* <div className="mb-4">
+          <div className="mb-4">
             <input
               type="text"
               id="phone"
@@ -135,7 +135,7 @@ const JobApplicationForm: React.FC = () => {
               required
               disabled={isDisabled}
             />
-          </div> */}
+          </div>
           <div className="mb-4">
             <select
               id="specialization"

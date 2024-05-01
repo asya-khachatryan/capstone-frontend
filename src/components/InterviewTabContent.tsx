@@ -25,7 +25,7 @@ import { useEffect, useState } from "react";
 import { RootState } from '../store';
 import Modal from "./Modal";
 import { createPortal } from "react-dom";
-import { Specialization, callSpecializations } from "@redux/specializationSlice";
+import { Specialization, getSpecializations } from "@redux/specializationSlice";
 import MentorAssignmentModal from "./MentorAssignmentModal";
 
 const InterviewTabContent: React.FC = () => {
@@ -48,16 +48,6 @@ const InterviewTabContent: React.FC = () => {
   const handleCloseModal = () => {
     setModalOpen(false);
   };
-
-  const specializations: Specialization[] = useAppSelector((state: RootState) => state.specialization.specializations);
-
-  useEffect(() => {
-    if (specializations.length === 0) {
-      dispatch(callSpecializations())
-      console.log(specializations)
-    }
-    console.log(specializations)
-  }, [specializations])
 
   return (
     <CardBody className="overflow-scroll px-0" placeholder={undefined}>
@@ -133,7 +123,7 @@ const InterviewTabContent: React.FC = () => {
                         className="font-normal"
                         placeholder={undefined}
                       >
-                        {specializations.find((spec) => spec.id === specialization.id)?.specialization}
+                        {specialization.specialization}
                       </Typography>
 
                     </div>
@@ -167,7 +157,7 @@ const InterviewTabContent: React.FC = () => {
                         createPortal(
                           <Modal
                             closeModal={handleCloseModal}
-                            size = "xl"
+                            size="xl"
                           >
                             <div>
                               <iframe src="public/CV - Asya Khachatryan.pdf" width="100%" height="500px" />

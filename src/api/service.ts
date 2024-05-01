@@ -77,9 +77,9 @@ class ApiService {
         ).json<TalentRequestDTO>();
     }
 
-    getCV(fileName: string) {
-        return ky.get(`${this.server_domain_endpoint}/download/${fileName}`
-        ).json<TalentRequestDTO>();
+    getCV(id: number) {
+        return ky.get(`${this.server_domain_endpoint}/talent/cv/${id}`
+        ).json<string>();
     }
 
 }

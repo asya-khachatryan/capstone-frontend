@@ -19,13 +19,15 @@ import {
   IconButton,
   Tooltip,
 } from "@material-tailwind/react";
-import { TalentRequestDTO, TalentResponseDTO, getTalents } from '@redux/talentSlice';
+import { TalentRequestDTO, TalentResponseDTO, getTalents, getTalentCV } from '@redux/talentSlice';
 import { useAppDispatch, useAppSelector } from '@hooks/redux';
 import { useEffect, useState } from "react";
 import { RootState } from '../store';
 import Modal from "./Modal";
 import { createPortal } from "react-dom";
-import { Specialization, callSpecializations } from "@redux/specializationSlice";
+import { Specialization, getSpecializations } from "@redux/specializationSlice";
+import apiService from '@api/service'
+
 
 const ApplicationTabContent: React.FC = () => {
   const TABLE_HEAD = ["#", "Member", "Specialization", "CV", "Status", ""];
@@ -48,20 +50,13 @@ const ApplicationTabContent: React.FC = () => {
     setModalOpen(false);
   };
 
-  const specializations: Specialization[] = useAppSelector((state: RootState) => state.specialization.specializations);
+  const cvURL: string = useAppSelector((state: RootState) => state.talent.cvURL);
 
-  useEffect(() => {
-    if (specializations.length === 0) {
-      dispatch(callSpecializations())
-      console.log(specializations)
-    }
-    console.log(specializations)
-  }, [specializations])
+  const dispatchAndSet = (id: number) => {
+    dispatch(getTalentCV(id))
+    setModalOpen(true)
+  }
 
-  // const getCV = () => {
-  //   dispatch(getCV({ firstName, lastName, email, phoneNumber, username, password }));
-  //   // navigate('/login');
-  // }
 
   return (
     <CardBody className="overflow-scroll px-0" placeholder={undefined}>
@@ -90,7 +85,7 @@ const ApplicationTabContent: React.FC = () => {
         </thead>
         <tbody>
           {talents.map(
-            ({ name, surname, email, phoneNumber, specialization, status }, index) => {
+            ({ id, name, surname, email, phoneNumber, specialization, status }, index) => {
               const isLast = index === talents.length - 1;
               const classes = isLast
                 ? "p-4"
@@ -106,7 +101,7 @@ const ApplicationTabContent: React.FC = () => {
                         className="font-normal"
                         placeholder={undefined}
                       >
-                        {index + 1}
+                        {id}
                       </Typography>
                     </div>
                   </td>
@@ -149,7 +144,7 @@ const ApplicationTabContent: React.FC = () => {
                         className="font-normal"
                         placeholder={undefined}
                       >
-                        {specializations.find((spec) => spec.id === specialization.id)?.specialization}
+                        {specialization.specialization}
                       </Typography>
                     </div>
                   </td>
@@ -160,7 +155,8 @@ const ApplicationTabContent: React.FC = () => {
                       className="font-normal"
                       placeholder={undefined}
                     >
-                      <Button variant="outlined" size="sm" placeholder={undefined} onClick={() => setModalOpen(true)}>
+                      <Button variant="outlined" size="sm" placeholder={undefined}
+                        onClick={() => dispatchAndSet(id)}>
                         view cv
                       </Button>
                       {modalOpen &&
@@ -170,7 +166,7 @@ const ApplicationTabContent: React.FC = () => {
                             size="xl"
                           >
                             <div>
-                              <iframe src="public/CV - Asya Khachatryan.pdf" width="100%" height="500px" />
+                              <iframe src="public/avatar.png" width="100%" height="500px" />
                             </div>
                           </Modal>,
                           document.body

@@ -25,12 +25,14 @@ interface TalentState {
     isLoading: boolean,
     talents: TalentResponseDTO[],
     interviewees: TalentResponseDTO[]
+    cvURL: string
 }
 
 const initialState: TalentState = {
     isLoading: false,
     talents: [],
-    interviewees: []
+    interviewees: [],
+    cvURL: ""
 };
 
 export const getTalents = createAsyncThunk(
@@ -51,8 +53,16 @@ export const getInterviewees = createAsyncThunk(
 
 export const searchTalents = createAsyncThunk(
     'searchTalents',
-    async ({ query }: any) => {
+    async (query: string) => {
         const response = await apiService.searchTalents(query);
+        return response;
+    }
+);
+
+export const getTalentCV = createAsyncThunk(
+    'getTalentCV',
+    async (id: number) => {
+        const response = await apiService.getCV(id);
         return response;
     }
 );
@@ -81,6 +91,9 @@ const talentsSlice = createSlice({
             })
             .addCase(getInterviewees.rejected, (state, action) => {
 
+            })
+            .addCase(getTalentCV.fulfilled, (state, action) => {
+                state.cvURL = action.payload
             });
     },
 });

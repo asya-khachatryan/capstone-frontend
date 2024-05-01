@@ -16,7 +16,7 @@ const initialState: SpecializationsState = {
     specializations: []
 };
 
-export const callSpecializations = createAsyncThunk(
+export const getSpecializations = createAsyncThunk(
     'specializations',
     async () => {
         const response = await apiService.getSpecializations();
@@ -31,13 +31,13 @@ const specializationsSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(callSpecializations.pending, (state) => {
+            .addCase(getSpecializations.pending, (state) => {
                 state.isLoading = true
             })
-            .addCase(callSpecializations.fulfilled, (state, action) => {
+            .addCase(getSpecializations.fulfilled, (state, action) => {
                 state.specializations = action.payload;
             })
-            .addCase(callSpecializations.rejected, (state, action) => {
+            .addCase(getSpecializations.rejected, (state, action) => {
 
             });
     },

@@ -11,6 +11,9 @@ import JobApplicationForm from './components/JobApplicationForm'
 import SortableTable from '@components/SortableTable';
 import { ThemeProvider } from '@material-tailwind/react';
 import ProfileDropDown from '@components/ProfileDropdown';
+import NotFoundPage from '@pages/NotFoundPage';
+import SignIn from '@components/SignIn';
+import SignUp from '@components/SignUp';
 
 const App: React.FC = () => {
 
@@ -24,7 +27,9 @@ const App: React.FC = () => {
           <Route path="/apply" element={<JobApplicationForm />} />
           <Route path="/dashboard" element={<SortableTable />} />
           <Route path="/dashboard2" element={<ProfileDropDown />} />
-
+          <Route path="*" element={<NotFoundPage />} />
+          <Route path="/test" element={<SignIn />} />
+          <Route path="/test2" element={<SignUp />} />
         </Routes>
       </HistoryRouter>
     </ReduxStoreProvider>
