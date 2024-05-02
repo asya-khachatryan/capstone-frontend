@@ -123,7 +123,7 @@ const JobApplicationForm: React.FC = () => {
               disabled={isDisabled}
             />
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <input
               type="text"
               id="phone"
@@ -135,7 +135,7 @@ const JobApplicationForm: React.FC = () => {
               required
               disabled={isDisabled}
             />
-          </div>
+          </div> */}
           <div className="mb-4">
             <select
               id="specialization"

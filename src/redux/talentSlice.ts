@@ -18,7 +18,8 @@ export interface TalentResponseDTO {
     email: string,
     phoneNumber: string,
     specialization: Specialization,
-    status: string
+    status: string,
+    dateApplied: string
 }
 
 interface TalentState {

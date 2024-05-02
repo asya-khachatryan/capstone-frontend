@@ -1,39 +1,29 @@
 import {
-  MagnifyingGlassIcon,
-  ChevronUpDownIcon,
+  ChevronUpDownIcon
 } from "@heroicons/react/24/outline";
-import { PencilIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { PencilIcon } from "@heroicons/react/24/solid";
+import { useAppDispatch, useAppSelector } from '@hooks/redux';
 import {
-  Card,
-  CardHeader,
-  Input,
-  Typography,
+  Avatar,
   Button,
   CardBody,
   Chip,
-  CardFooter,
-  Tabs,
-  TabsHeader,
-  Tab,
-  Avatar,
   IconButton,
   Tooltip,
+  Typography
 } from "@material-tailwind/react";
-import { TalentRequestDTO, TalentResponseDTO, getTalents, getTalentCV } from '@redux/talentSlice';
-import { useAppDispatch, useAppSelector } from '@hooks/redux';
+import { TalentResponseDTO, getTalentCV, getTalents } from '@redux/talentSlice';
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { RootState } from '../store';
 import Modal from "./Modal";
-import { createPortal } from "react-dom";
-import { Specialization, getSpecializations } from "@redux/specializationSlice";
-import apiService from '@api/service'
+
 
 
 const ApplicationTabContent: React.FC = () => {
-  const TABLE_HEAD = ["#", "Member", "Specialization", "CV", "Status", ""];
+  const TABLE_HEAD = ["Member", "Specialization", "CV", "Status", "Date Applied", ""];
 
   const dispatch = useAppDispatch();
-
   const talents: TalentResponseDTO[] = useAppSelector((state: RootState) => state.talent.talents);
 
   useEffect(() => {
@@ -56,7 +46,6 @@ const ApplicationTabContent: React.FC = () => {
     dispatch(getTalentCV(id))
     setModalOpen(true)
   }
-
 
   return (
     <CardBody className="overflow-scroll px-0" placeholder={undefined}>
@@ -85,7 +74,7 @@ const ApplicationTabContent: React.FC = () => {
         </thead>
         <tbody>
           {talents.map(
-            ({ id, name, surname, email, phoneNumber, specialization, status }, index) => {
+            ({ id, name, surname, email, phoneNumber, specialization, status, dateApplied }, index) => {
               const isLast = index === talents.length - 1;
               const classes = isLast
                 ? "p-4"
@@ -93,18 +82,6 @@ const ApplicationTabContent: React.FC = () => {
 
               return (
                 <tr key={name + " " + surname}>
-                  <td className={classes}>
-                    <div>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal"
-                        placeholder={undefined}
-                      >
-                        {id}
-                      </Typography>
-                    </div>
-                  </td>
                   <td className={classes}>
                     <div className="flex items-center gap-3">
                       <Avatar src="public/avatar.png" alt={name} size="sm" placeholder={undefined} />
@@ -181,6 +158,18 @@ const ApplicationTabContent: React.FC = () => {
                         value={status}
                         color={status === "REJECTED" ? "red" : "blue-gray"}
                       />
+                    </div>
+                  </td>
+                  <td className={classes}>
+                    <div>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                        placeholder={undefined}
+                      >
+                        {dateApplied}
+                      </Typography>
                     </div>
                   </td>
 

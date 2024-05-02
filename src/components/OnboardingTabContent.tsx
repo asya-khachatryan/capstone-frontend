@@ -1,32 +1,22 @@
 import {
-  MagnifyingGlassIcon,
-  ChevronUpDownIcon,
+  ChevronUpDownIcon
 } from "@heroicons/react/24/outline";
-import { PencilIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { PencilIcon } from "@heroicons/react/24/solid";
+import { useAppDispatch, useAppSelector } from '@hooks/redux';
 import {
-  Card,
-  CardHeader,
-  Input,
-  Typography,
+  Avatar,
   Button,
   CardBody,
   Chip,
-  CardFooter,
-  Tabs,
-  TabsHeader,
-  Tab,
-  Avatar,
   IconButton,
   Tooltip,
+  Typography
 } from "@material-tailwind/react";
-import { TalentRequestDTO, TalentResponseDTO, getTalents } from '@redux/talentSlice';
-import { useAppDispatch, useAppSelector } from '@hooks/redux';
+import { MenteeDto, getMentees } from "@redux/onboardingSlice";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { RootState } from '../store';
 import Modal from "./Modal";
-import { createPortal } from "react-dom";
-import { Specialization, getSpecializations } from "@redux/specializationSlice";
-import { MenteeDto, getMentees } from "@redux/onboardingSlice";
 
 const OnboardingTabContent: React.FC = () => {
   const TABLE_HEAD = ["Member", "Specialization", "Mentor", "Status", "Actions"];
@@ -74,7 +64,7 @@ const OnboardingTabContent: React.FC = () => {
         </thead>
         <tbody>
           {mentees.map(
-            ({ firstName, lastName, email, phoneNumber  }, index) => {
+            ({ firstName, lastName, email, phoneNumber }, index) => {
               const isLast = index === mentees.length - 1;
               const classes = isLast
                 ? "p-4"

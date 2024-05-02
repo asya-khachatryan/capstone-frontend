@@ -1,35 +1,25 @@
 import {
-  MagnifyingGlassIcon,
-  ChevronUpDownIcon,
+  MagnifyingGlassIcon
 } from "@heroicons/react/24/outline";
-import { PencilIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { useAppDispatch } from '@hooks/redux';
 import {
+  Avatar,
+  Button,
   Card,
+  CardFooter,
   CardHeader,
   Input,
-  Typography,
-  Button,
-  CardBody,
-  Chip,
-  CardFooter,
+  Tab,
   Tabs,
   TabsHeader,
-  Tab,
-  Avatar,
-  IconButton,
-  Tooltip,
+  Typography
 } from "@material-tailwind/react";
-import { TalentRequestDTO, TalentResponseDTO, getTalents, searchTalents } from '@redux/talentSlice';
-import { useAppDispatch, useAppSelector } from '@hooks/redux';
-import { useEffect, useState } from "react";
-import { RootState } from '../store';
-import Modal from "./Modal";
-import { createPortal } from "react-dom";
-import React from "react";
+import { searchTalents } from '@redux/talentSlice';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ApplicationTabContent from "./ApplicationTabContent";
 import InterviewTabContent from "./InterviewTabContent";
 import OnboardingTabContent from "./OnboardingTabContent";
-import ProfileDropDown from "./ProfileDropdown";
 
 const tabs: { name: string, content: React.ReactNode }[] = [
   { name: 'Application', content: <ApplicationTabContent /> },
@@ -39,6 +29,7 @@ const tabs: { name: string, content: React.ReactNode }[] = [
 
 const SortableTable: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -59,8 +50,8 @@ const SortableTable: React.FC = () => {
             </Typography>
           </div>
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-            <ProfileDropDown />
-            <Avatar src="public/avatar.png" alt="avatar" placeholder={undefined} />
+            {/* <ProfileDropDown /> */}
+            <Avatar src="public/avatar.png" alt="avatar" placeholder={undefined} onClick={() => navigate("/profile")} />
 
           </div>
         </div>
