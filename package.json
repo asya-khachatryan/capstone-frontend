@@ -29,6 +29,7 @@
     "@material-tailwind/react": "^2.1.9",
     "@reduxjs/toolkit": "2.2.3",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.11",
     "dot-env": "^0.0.1",
     "history": "^5.3.0",
     "ky": "^1.2.4",

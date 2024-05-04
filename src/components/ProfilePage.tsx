@@ -1,22 +1,6 @@
-import React from "react";
-
-// @material-tailwind/react
-import {
-  Input,
-  Typography,
-  Select,
-  Option,
-  Popover,
-  PopoverHandler,
-  PopoverContent,
-} from "@material-tailwind/react";
-
-// @heroicons/react
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import { Input, Option, Select, Typography } from '@material-tailwind/react'
 
 function ProfilePage() {
-  const [date, setDate] = React.useState();
-
   return (
     <section className="px-8 py-20 container mx-auto">
       <Typography variant="h5" color="blue-gray" placeholder={undefined}>
@@ -44,7 +28,7 @@ function ProfilePage() {
               size="lg"
               placeholder="Emma"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
             />
@@ -61,7 +45,7 @@ function ProfilePage() {
               size="lg"
               placeholder="Roberts"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
             />
@@ -79,7 +63,7 @@ function ProfilePage() {
             <Select
               size="lg"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="border-t-blue-gray-200 aria-[expanded=true]:border-t-primary"
             >
@@ -98,7 +82,7 @@ function ProfilePage() {
             <Select
               size="lg"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="border-t-blue-gray-200 aria-[expanded=true]:border-t-primary"
             >
@@ -145,7 +129,7 @@ function ProfilePage() {
             <Select
               size="lg"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="border-t-blue-gray-200 aria-[expanded=true]:border-t-primary"
             >
@@ -168,7 +152,7 @@ function ProfilePage() {
               size="lg"
               placeholder="emma@mail.com"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
             />
@@ -185,7 +169,7 @@ function ProfilePage() {
               size="lg"
               placeholder="emma@mail.com"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
             />
@@ -204,7 +188,7 @@ function ProfilePage() {
               size="lg"
               placeholder="Florida, USA"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
             />
@@ -221,7 +205,7 @@ function ProfilePage() {
               size="lg"
               placeholder="+123 0123 456 789"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
             />
@@ -240,7 +224,7 @@ function ProfilePage() {
               size="lg"
               placeholder="Language"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
             />
@@ -257,7 +241,7 @@ function ProfilePage() {
               size="lg"
               placeholder="Skills"
               labelProps={{
-                className: "hidden",
+                className: 'hidden',
               }}
               className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
             />
@@ -265,7 +249,7 @@ function ProfilePage() {
         </div>
       </div>
     </section>
-  );
+  )
 }
 
-export default ProfilePage;
+export default ProfilePage

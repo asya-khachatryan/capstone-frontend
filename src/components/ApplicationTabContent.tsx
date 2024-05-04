@@ -1,8 +1,6 @@
-import {
-  ChevronUpDownIcon
-} from "@heroicons/react/24/outline";
-import { PencilIcon } from "@heroicons/react/24/solid";
-import { useAppDispatch, useAppSelector } from '@hooks/redux';
+import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
+import { PencilIcon } from '@heroicons/react/24/solid'
+import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
   Avatar,
   Button,
@@ -10,21 +8,29 @@ import {
   Chip,
   IconButton,
   Tooltip,
-  Typography
-} from "@material-tailwind/react";
-import { TalentResponseDTO, getTalentCV, getTalents } from '@redux/talentSlice';
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import { RootState } from '../store';
-import Modal from "./Modal";
-
-
+  Typography,
+} from '@material-tailwind/react'
+import { TalentResponseDTO, getTalentCV, getTalents } from '@redux/talentSlice'
+import dayjs from 'dayjs'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { RootState } from '../store'
+import Modal from './Modal'
 
 const ApplicationTabContent: React.FC = () => {
-  const TABLE_HEAD = ["Member", "Specialization", "CV", "Status", "Date Applied", ""];
+  const TABLE_HEAD = [
+    'Member',
+    'Specialization',
+    'CV',
+    'Status',
+    'Date Applied',
+    '',
+  ]
 
-  const dispatch = useAppDispatch();
-  const talents: TalentResponseDTO[] = useAppSelector((state: RootState) => state.talent.talents);
+  const dispatch = useAppDispatch()
+  const talents: TalentResponseDTO[] = useAppSelector(
+    (state: RootState) => state.talent.talents,
+  )
 
   useEffect(() => {
     if (talents.length === 0) {
@@ -34,13 +40,13 @@ const ApplicationTabContent: React.FC = () => {
     console.log(talents)
   }, [talents])
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false)
 
   const handleCloseModal = () => {
-    setModalOpen(false);
-  };
+    setModalOpen(false)
+  }
 
-  const cvURL: string = useAppSelector((state: RootState) => state.talent.cvURL);
+  const cvURL: string = useAppSelector((state: RootState) => state.talent.cvURL)
 
   const dispatchAndSet = (id: number) => {
     dispatch(getTalentCV(id))
@@ -63,7 +69,7 @@ const ApplicationTabContent: React.FC = () => {
                   className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
                   placeholder={undefined}
                 >
-                  {head}{" "}
+                  {head}{' '}
                   {index !== TABLE_HEAD.length - 1 && (
                     <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
                   )}
@@ -74,17 +80,34 @@ const ApplicationTabContent: React.FC = () => {
         </thead>
         <tbody>
           {talents.map(
-            ({ id, name, surname, email, phoneNumber, specialization, status, dateApplied }, index) => {
-              const isLast = index === talents.length - 1;
+            (
+              {
+                id,
+                name,
+                surname,
+                email,
+                phoneNumber,
+                specialization,
+                status,
+                dateApplied,
+              },
+              index,
+            ) => {
+              const isLast = index === talents.length - 1
               const classes = isLast
-                ? "p-4"
-                : "p-4 border-b border-blue-gray-50";
+                ? 'p-4'
+                : 'p-4 border-b border-blue-gray-50'
 
               return (
-                <tr key={name + " " + surname}>
+                <tr key={name + ' ' + surname}>
                   <td className={classes}>
                     <div className="flex items-center gap-3">
-                      <Avatar src="public/avatar.png" alt={name} size="sm" placeholder={undefined} />
+                      <Avatar
+                        src="public/avatar.png"
+                        alt={name}
+                        size="sm"
+                        placeholder={undefined}
+                      />
                       <div className="flex flex-col">
                         <Typography
                           variant="small"
@@ -92,7 +115,7 @@ const ApplicationTabContent: React.FC = () => {
                           className="font-normal"
                           placeholder={undefined}
                         >
-                          {name + " " + surname}
+                          {name + ' ' + surname}
                         </Typography>
                         <Typography
                           variant="small"
@@ -132,21 +155,26 @@ const ApplicationTabContent: React.FC = () => {
                       className="font-normal"
                       placeholder={undefined}
                     >
-                      <Button variant="outlined" size="sm" placeholder={undefined}
-                        onClick={() => dispatchAndSet(id)}>
+                      <Button
+                        variant="outlined"
+                        size="sm"
+                        placeholder={undefined}
+                        onClick={() => dispatchAndSet(id)}
+                      >
                         view cv
                       </Button>
                       {modalOpen &&
                         createPortal(
-                          <Modal
-                            closeModal={handleCloseModal}
-                            size="xl"
-                          >
+                          <Modal closeModal={handleCloseModal} size="xl">
                             <div>
-                              <iframe src="public/avatar.png" width="100%" height="500px" />
+                              <iframe
+                                src="public/avatar.png"
+                                width="100%"
+                                height="500px"
+                              />
                             </div>
                           </Modal>,
-                          document.body
+                          document.body,
                         )}
                     </Typography>
                   </td>
@@ -156,7 +184,7 @@ const ApplicationTabContent: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         value={status}
-                        color={status === "REJECTED" ? "red" : "blue-gray"}
+                        color={status === 'REJECTED' ? 'red' : 'blue-gray'}
                       />
                     </div>
                   </td>
@@ -168,7 +196,7 @@ const ApplicationTabContent: React.FC = () => {
                         className="font-normal"
                         placeholder={undefined}
                       >
-                        {dateApplied}
+                        {dayjs(dateApplied).format('YYYY-MM-DD HH:mm:ss')}
                       </Typography>
                     </div>
                   </td>
@@ -181,13 +209,13 @@ const ApplicationTabContent: React.FC = () => {
                     </Tooltip>
                   </td>
                 </tr>
-              );
+              )
             },
           )}
         </tbody>
       </table>
     </CardBody>
-  );
+  )
 }
 
-export default ApplicationTabContent;
+export default ApplicationTabContent
