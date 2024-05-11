@@ -1,53 +1,43 @@
+import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
+import { PencilIcon } from '@heroicons/react/24/solid'
+import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
-  MagnifyingGlassIcon,
-  ChevronUpDownIcon,
-} from "@heroicons/react/24/outline";
-import { PencilIcon, UserPlusIcon } from "@heroicons/react/24/solid";
-import {
-  Card,
-  CardHeader,
-  Input,
-  Typography,
+  Avatar,
   Button,
   CardBody,
   Chip,
-  CardFooter,
-  Tabs,
-  TabsHeader,
-  Tab,
-  Avatar,
   IconButton,
   Tooltip,
-} from "@material-tailwind/react";
-import { TalentRequestDTO, TalentResponseDTO, getInterviewees, getTalents } from '@redux/talentSlice';
-import { useAppDispatch, useAppSelector } from '@hooks/redux';
-import { useEffect, useState } from "react";
-import { RootState } from '../store';
-import Modal from "./Modal";
-import { createPortal } from "react-dom";
-import { Specialization, getSpecializations } from "@redux/specializationSlice";
-import MentorAssignmentModal from "./MentorAssignmentModal";
+  Typography,
+} from '@material-tailwind/react'
+import { TalentResponseDTO, getInterviewees } from '@redux/talentSlice'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { RootState } from '../store'
+import Modal from './Modal'
 
 const InterviewTabContent: React.FC = () => {
-  const TABLE_HEAD = ["Member", "Specialization", "Status", "Next Step", ""];
+  const TABLE_HEAD = ['Member', 'Specialization', 'Status', 'Next Step', '']
 
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch()
 
-  const interviewwes: TalentResponseDTO[] = useAppSelector((state: RootState) => state.talent.interviewees);
+  const interviewwes: TalentResponseDTO[] | undefined = useAppSelector(
+    (state: RootState) => state.talent.interviewees,
+  )
 
   useEffect(() => {
-    if (interviewwes.length === 0) {
+    if (interviewwes === undefined) {
       dispatch(getInterviewees())
       console.log(interviewwes)
     }
     console.log(interviewwes)
   }, [interviewwes])
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false)
 
   const handleCloseModal = () => {
-    setModalOpen(false);
-  };
+    setModalOpen(false)
+  }
 
   return (
     <CardBody className="overflow-scroll px-0" placeholder={undefined}>
@@ -65,7 +55,7 @@ const InterviewTabContent: React.FC = () => {
                   className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
                   placeholder={undefined}
                 >
-                  {head}{" "}
+                  {head}{' '}
                   {index !== TABLE_HEAD.length - 1 && (
                     <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
                   )}
@@ -75,18 +65,26 @@ const InterviewTabContent: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {interviewwes.map(
-            ({ name, surname, email, phoneNumber, specialization, status }, index) => {
-              const isLast = index === interviewwes.length - 1;
+          {interviewwes?.map(
+            (
+              { name, surname, email, phoneNumber, specialization, status },
+              index,
+            ) => {
+              const isLast = index === interviewwes.length - 1
               const classes = isLast
-                ? "p-4"
-                : "p-4 border-b border-blue-gray-50";
+                ? 'p-4'
+                : 'p-4 border-b border-blue-gray-50'
 
               return (
-                <tr key={name + " " + surname}>
+                <tr key={name + ' ' + surname}>
                   <td className={classes}>
                     <div className="flex items-center gap-3">
-                      <Avatar src="public/avatar.png" alt={name} size="sm" placeholder={undefined} />
+                      <Avatar
+                        src="public/avatar.png"
+                        alt={name}
+                        size="sm"
+                        placeholder={undefined}
+                      />
                       <div className="flex flex-col">
                         <Typography
                           variant="small"
@@ -94,7 +92,7 @@ const InterviewTabContent: React.FC = () => {
                           className="font-normal"
                           placeholder={undefined}
                         >
-                          {name + " " + surname}
+                          {name + ' ' + surname}
                         </Typography>
                         <Typography
                           variant="small"
@@ -125,7 +123,6 @@ const InterviewTabContent: React.FC = () => {
                       >
                         {specialization.specialization}
                       </Typography>
-
                     </div>
                   </td>
                   <td className={classes}>
@@ -134,11 +131,11 @@ const InterviewTabContent: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         value={status}
-                        color={status === "REJECTED" ? "red" : "blue-gray"}
+                        color={status === 'REJECTED' ? 'red' : 'blue-gray'}
                       />
                     </div>
                   </td>
-                  <td className={classes} >
+                  <td className={classes}>
                     <Typography
                       variant="small"
                       color="blue-gray"
@@ -146,24 +143,36 @@ const InterviewTabContent: React.FC = () => {
                       placeholder={undefined}
                     >
                       <div className="flex gap-2 mb-2">
-                        <Button variant="outlined" size="sm" placeholder={undefined} onClick={() => setModalOpen(true)} color="red">
+                        <Button
+                          variant="outlined"
+                          size="sm"
+                          placeholder={undefined}
+                          onClick={() => setModalOpen(true)}
+                          color="red"
+                        >
                           Reject
                         </Button>
-                        <Button variant="outlined" size="sm" placeholder={undefined} onClick={() => setModalOpen(true)}>
+                        <Button
+                          variant="outlined"
+                          size="sm"
+                          placeholder={undefined}
+                          onClick={() => setModalOpen(true)}
+                        >
                           view cv
                         </Button>
                       </div>
                       {modalOpen &&
                         createPortal(
-                          <Modal
-                            closeModal={handleCloseModal}
-                            size="xl"
-                          >
+                          <Modal closeModal={handleCloseModal} size="xl">
                             <div>
-                              <iframe src="public/CV - Asya Khachatryan.pdf" width="100%" height="500px" />
+                              <iframe
+                                src="public/CV - Asya Khachatryan.pdf"
+                                width="100%"
+                                height="500px"
+                              />
                             </div>
                           </Modal>,
-                          document.body
+                          document.body,
                         )}
                     </Typography>
                   </td>
@@ -175,17 +184,15 @@ const InterviewTabContent: React.FC = () => {
                     </Tooltip>
                   </td>
                 </tr>
-              );
+              )
             },
           )}
         </tbody>
       </table>
       <script src="node_modules/@material-tailwind/html@latest/scripts/dialog.js"></script>
-
     </CardBody>
-  );
+  )
 }
-<script src="node_modules/@material-tailwind/html@latest/scripts/dialog.js"></script>
+;<script src="node_modules/@material-tailwind/html@latest/scripts/dialog.js"></script>
 
-
-export default InterviewTabContent;
+export default InterviewTabContent

@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../hooks/redux';
-import { Specialization, getSpecializations } from '../redux/specializationSlice';
-import { RootState } from '../store';
-import { createPortal } from "react-dom";
-import Modal from "../components/Modal"
+import React, { useState, useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '../hooks/redux'
+import {
+  Specialization,
+  getSpecializations,
+} from '../redux/specializationSlice'
+import { RootState } from '../store'
+import { createPortal } from 'react-dom'
+import Modal from '../components/Modal'
 import apiService from '@api/service'
-import { TalentRequestDTO } from '@redux/talentSlice';
-
+import { TalentRequestDTO } from '@redux/talentSlice'
 
 const JobApplicationForm: React.FC = () => {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -18,33 +20,37 @@ const JobApplicationForm: React.FC = () => {
     phoneNumber: '',
     specializationId: 0,
     cv: null as File | null,
-  });
+  })
 
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch()
 
-  const specializations: Specialization[] = useAppSelector((state: RootState) => state.specialization.specializations);
+  const specializations: Specialization[] | undefined = useAppSelector(
+    (state: RootState) => state.specialization.specializations,
+  )
 
   useEffect(() => {
-    if (specializations.length === 0) {
+    if (specializations === undefined) {
       dispatch(getSpecializations())
       console.log(specializations)
     }
     console.log(specializations)
   }, [specializations])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFormData({ ...formData, cv: e.target.files[0] });
+      setFormData({ ...formData, cv: e.target.files[0] })
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log(formData);
+    e.preventDefault()
+    console.log(formData)
     // setModalOpen(true);
 
     const talent: TalentRequestDTO = {
@@ -52,14 +58,14 @@ const JobApplicationForm: React.FC = () => {
     }
 
     if (!formData.cv) {
-      console.error('No file selected');
-      return;
+      console.error('No file selected')
+      return
     }
 
-    const formDataToSend = new FormData();
-    formDataToSend.append("file", formData.cv)
+    const formDataToSend = new FormData()
+    formDataToSend.append('file', formData.cv)
 
-    const response = await apiService.createTalent(talent);
+    const response = await apiService.createTalent(talent)
     apiService.uploadCV(response.id, formDataToSend)
 
     setFormData({
@@ -69,12 +75,12 @@ const JobApplicationForm: React.FC = () => {
       phoneNumber: '',
       specializationId: 0,
       cv: null,
-    });
-  };
+    })
+  }
 
   const handleCloseModal = () => {
-    setModalOpen(false);
-  };
+    setModalOpen(false)
+  }
 
   const isDisabled = false
   //form should be disabled until specializations are loaded
@@ -146,10 +152,8 @@ const JobApplicationForm: React.FC = () => {
               required
               disabled={isDisabled}
             >
-              {specializations.map(item => (
-                <option key={item.id.toString()}>
-                  {item.specialization}
-                </option>
+              {specializations?.map((item) => (
+                <option key={item.id.toString()}>{item.specialization}</option>
               ))}
             </select>
           </div>
@@ -173,20 +177,17 @@ const JobApplicationForm: React.FC = () => {
           </button>
           {modalOpen &&
             createPortal(
-              <Modal
-                closeModal={handleCloseModal}
-                size="lg"
-              >
+              <Modal closeModal={handleCloseModal} size="lg">
                 <h1>This is a modal</h1>
                 <br />
                 <p>This is the modal description</p>
               </Modal>,
-              document.body
+              document.body,
             )}
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default JobApplicationForm;
+export default JobApplicationForm

@@ -1,8 +1,6 @@
-import {
-  ChevronUpDownIcon
-} from "@heroicons/react/24/outline";
-import { PencilIcon } from "@heroicons/react/24/solid";
-import { useAppDispatch, useAppSelector } from '@hooks/redux';
+import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
+import { PencilIcon } from '@heroicons/react/24/solid'
+import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
   Avatar,
   Button,
@@ -10,32 +8,33 @@ import {
   Chip,
   IconButton,
   Tooltip,
-  Typography
-} from "@material-tailwind/react";
-import { MenteeDto, getMentees } from "@redux/onboardingSlice";
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import { RootState } from '../store';
-import Modal from "./Modal";
+  Typography,
+} from '@material-tailwind/react'
+import { MenteeDto, getMentees } from '@redux/onboardingSlice'
+import { useEffect, useState } from 'react'
+import { RootState } from '../store'
+import MentorAssignmentModal from './MentorAssignmentModal'
 
 const OnboardingTabContent: React.FC = () => {
-  const TABLE_HEAD = ["Member", "Specialization", "Mentor", "Status", "Actions"];
+  const TABLE_HEAD = ['Member', 'Specialization', 'Mentor', 'Status', 'Actions']
 
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch()
 
-  const mentees: MenteeDto[] = useAppSelector((state: RootState) => state.onboarding.mentees);
+  const mentees: MenteeDto[] | undefined = useAppSelector(
+    (state: RootState) => state.onboarding.mentees,
+  )
 
   useEffect(() => {
-    if (mentees.length === 0) {
+    if (mentees === undefined) {
       dispatch(getMentees())
     }
   }, [mentees])
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false)
 
   const handleCloseModal = () => {
-    setModalOpen(false);
-  };
+    setModalOpen(false)
+  }
 
   return (
     <CardBody className="overflow-scroll px-0" placeholder={undefined}>
@@ -53,7 +52,7 @@ const OnboardingTabContent: React.FC = () => {
                   className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
                   placeholder={undefined}
                 >
-                  {head}{" "}
+                  {head}{' '}
                   {index !== TABLE_HEAD.length - 1 && (
                     <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
                   )}
@@ -63,18 +62,23 @@ const OnboardingTabContent: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {mentees.map(
+          {mentees?.map(
             ({ firstName, lastName, email, phoneNumber }, index) => {
-              const isLast = index === mentees.length - 1;
+              const isLast = index === mentees.length - 1
               const classes = isLast
-                ? "p-4"
-                : "p-4 border-b border-blue-gray-50";
+                ? 'p-4'
+                : 'p-4 border-b border-blue-gray-50'
 
               return (
-                <tr key={firstName + " " + lastName}>
+                <tr key={firstName + ' ' + lastName}>
                   <td className={classes}>
                     <div className="flex items-center gap-3">
-                      <Avatar src="public/avatar.png" alt={firstName} size="sm" placeholder={undefined} />
+                      <Avatar
+                        src="public/avatar.png"
+                        alt={firstName}
+                        size="sm"
+                        placeholder={undefined}
+                      />
                       <div className="flex flex-col">
                         <Typography
                           variant="small"
@@ -82,7 +86,7 @@ const OnboardingTabContent: React.FC = () => {
                           className="font-normal"
                           placeholder={undefined}
                         >
-                          {firstName + " " + lastName}
+                          {firstName + ' ' + lastName}
                         </Typography>
                         <Typography
                           variant="small"
@@ -113,7 +117,6 @@ const OnboardingTabContent: React.FC = () => {
                       >
                         {lastName}
                       </Typography>
-
                     </div>
                   </td>
                   <td className={classes}>
@@ -123,21 +126,20 @@ const OnboardingTabContent: React.FC = () => {
                       className="font-normal"
                       placeholder={undefined}
                     >
-                      <Button variant="outlined" size="sm" placeholder={undefined} onClick={() => setModalOpen(true)}>
+                      <Button
+                        variant="outlined"
+                        size="sm"
+                        placeholder={undefined}
+                        onClick={() => setModalOpen(true)}
+                      >
                         assign
                       </Button>
-                      {modalOpen &&
-                        createPortal(
-                          <Modal
-                            closeModal={handleCloseModal}
-                            size="xl"
-                          >
-                            <div>
-                              <iframe src="public/CV - Asya Khachatryan.pdf" width="100%" height="500px" />
-                            </div>
-                          </Modal>,
-                          document.body
-                        )}
+                      {modalOpen && (
+                        <MentorAssignmentModal
+                          closeModal={() => console.log()}
+                          size="md"
+                        />
+                      )}
                     </Typography>
                   </td>
                   <td className={classes}>
@@ -146,7 +148,7 @@ const OnboardingTabContent: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         value={status}
-                        color={status === "REJECTED" ? "red" : "blue-gray"}
+                        color={status === 'REJECTED' ? 'red' : 'blue-gray'}
                       />
                     </div>
                   </td>
@@ -159,13 +161,13 @@ const OnboardingTabContent: React.FC = () => {
                     </Tooltip>
                   </td>
                 </tr>
-              );
+              )
             },
           )}
         </tbody>
       </table>
     </CardBody>
-  );
+  )
 }
 
-export default OnboardingTabContent;
+export default OnboardingTabContent

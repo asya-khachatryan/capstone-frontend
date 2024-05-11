@@ -1,15 +1,64 @@
+import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
   Avatar,
   Button,
   Card,
   CardBody,
   Input,
-  Typography
-} from "@material-tailwind/react";
+  Typography,
+} from '@material-tailwind/react'
+import { UserDTO, getCurrentUser, updateUser } from '@redux/authSlice'
+import { useEffect, useState } from 'react'
+import { RootState } from 'store'
+import NavigationBar from '@components/Navbar'
 
 export function Profile() {
+  const dispatch = useAppDispatch()
+
+  const me: UserDTO | undefined = useAppSelector(
+    (state: RootState) => state.auth.me,
+  )
+
+  const [editMode, setEditMode] = useState(false)
+
+  // State variables to store updated user information
+  const [updatedInfo, setUpdatedInfo] = useState({
+    firstName: me?.firstName || '',
+    lastName: me?.lastName || '',
+    email: me?.email || '',
+    phoneNumber: me?.phoneNumber || '',
+  })
+
+  useEffect(() => {
+    dispatch(getCurrentUser())
+  }, [])
+
+  const handleEditClick = () => {
+    // Toggle edit mode
+    setEditMode(!editMode)
+  }
+
+  const handleSaveClick = () => {
+    // Dispatch an action to update user information
+    const user: UserDTO = {
+      ...updatedInfo,
+    }
+    dispatch(updateUser(user))
+    // Exit edit mode
+    setEditMode(false)
+  }
+
+  const handleInputChange = (key: string, value: string) => {
+    // Update the state with the new input value
+    setUpdatedInfo({
+      ...updatedInfo,
+      [key]: value,
+    })
+  }
+
   return (
     <>
+      <NavigationBar />
       <div className="relative mt-8 h-48 w-full overflow-hidden rounded-xl bg-[url('/img/background-image.png')] bg-cover	bg-center">
         <div className="absolute inset-0 h-full w-full bg-gray-900/75" />
       </div>
@@ -26,7 +75,7 @@ export function Profile() {
               />
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
-                  Richard Davis
+                  {me?.firstName + ' ' + me?.lastName}
                 </Typography>
                 <Typography
                   variant="small"
@@ -37,7 +86,11 @@ export function Profile() {
               </div>
             </div>
             <section className="px-8 py-20 container mx-auto">
-              <Typography variant="h5" color="blue-gray" placeholder={undefined}>
+              <Typography
+                variant="h5"
+                color="blue-gray"
+                placeholder={undefined}
+              >
                 Basic Information
               </Typography>
               <Typography
@@ -62,9 +115,11 @@ export function Profile() {
                       size="lg"
                       placeholder="Emma"
                       labelProps={{
-                        className: "hidden",
+                        className: 'hidden',
                       }}
                       className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
+                      disabled={!editMode}
+                      value={me?.firstName}
                     />
                   </div>
                   <div className="w-full">
@@ -79,9 +134,11 @@ export function Profile() {
                       size="lg"
                       placeholder="Roberts"
                       labelProps={{
-                        className: "hidden",
+                        className: 'hidden',
                       }}
                       className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
+                      disabled={!editMode}
+                      value={me?.lastName}
                     />
                   </div>
                 </div>
@@ -98,9 +155,11 @@ export function Profile() {
                       size="lg"
                       placeholder="emma@mail.com"
                       labelProps={{
-                        className: "hidden",
+                        className: 'hidden',
                       }}
                       className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
+                      disabled={!editMode}
+                      value={me?.email}
                     />
                   </div>
                   <div className="w-full">
@@ -115,18 +174,30 @@ export function Profile() {
                       size="lg"
                       placeholder="+123 0123 456 789"
                       labelProps={{
-                        className: "hidden",
+                        className: 'hidden',
                       }}
                       className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
+                      disabled={!editMode}
+                      value={me?.phoneNumber}
                     />
                   </div>
                 </div>
               </div>
               <div className="flex gap-2 mb-2">
-                <Button variant="outlined" size="sm" placeholder={undefined}>
-                  Edit
+                <Button
+                  variant="outlined"
+                  size="sm"
+                  placeholder={undefined}
+                  onClick={handleEditClick}
+                >
+                  {editMode ? 'Cancel' : 'Edit'}
                 </Button>
-                <Button size="sm" placeholder={undefined} color="black">
+                <Button
+                  size="sm"
+                  placeholder={undefined}
+                  color="black"
+                  onClick={handleSaveClick}
+                >
                   Save
                 </Button>
               </div>
@@ -135,7 +206,7 @@ export function Profile() {
         </CardBody>
       </Card>
     </>
-  );
+  )
 }
 
-export default Profile;
+export default Profile

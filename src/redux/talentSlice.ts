@@ -1,103 +1,128 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import apiService from '@api/service'
-import { Specialization } from './specializationSlice';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { PageableRequest, PageableResponse } from 'services/types'
+import { Specialization } from './specializationSlice'
 
 export interface TalentRequestDTO {
-    name: string,
-    surname: string,
-    email: string,
-    phoneNumber: string,
-    specializationId: number,
-    status?: string
+  name: string
+  surname: string
+  email: string
+  phoneNumber: string
+  specializationId: number
+  status?: string
 }
 
 export interface TalentResponseDTO {
-    id: number,
-    name: string,
-    surname: string,
-    email: string,
-    phoneNumber: string,
-    specialization: Specialization,
-    status: string,
-    dateApplied: string
+  id: number
+  name: string
+  surname: string
+  email: string
+  phoneNumber: string
+  specialization: Specialization
+  status: string
+  dateApplied: string
 }
 
 interface TalentState {
-    isLoading: boolean,
-    talents: TalentResponseDTO[],
-    interviewees: TalentResponseDTO[]
-    cvURL: string
+  isLoading: boolean
+  talents?: TalentResponseDTO[]
+  talentsPageable?: PageableResponse<TalentResponseDTO>
+  interviewees?: TalentResponseDTO[]
 }
 
 const initialState: TalentState = {
-    isLoading: false,
-    talents: [],
-    interviewees: [],
-    cvURL: ""
-};
+  isLoading: false,
+  talents: undefined,
+  talentsPageable: undefined,
+  interviewees: undefined,
+}
 
-export const getTalents = createAsyncThunk(
-    'talents',
-    async () => {
-        const response = await apiService.getTalents();
-        return response;
-    }
-);
+export const getTalents = createAsyncThunk('talents', async () => {
+  const response = await apiService.getTalents()
+  return response
+})
 
-export const getInterviewees = createAsyncThunk(
-    'interviewees',
-    async () => {
-        const response = await apiService.getInterviewees();
-        return response;
-    }
-);
+export const getTalentsPageable = createAsyncThunk(
+  'talentsPageable',
+  async (request: PageableRequest) => {
+    const response = await apiService.getTalentsPageable(request)
+    return response
+  },
+)
+
+export const getInterviewees = createAsyncThunk('interviewees', async () => {
+  const response = await apiService.getInterviewees()
+  return response
+})
 
 export const searchTalents = createAsyncThunk(
-    'searchTalents',
-    async (query: string) => {
-        const response = await apiService.searchTalents(query);
-        return response;
-    }
-);
+  'searchTalents',
+  async (query: string) => {
+    const response = await apiService.searchTalents(query, 'Application')
+    return response
+  },
+)
+
+export const searchInterviewees = createAsyncThunk(
+  'searchInterviewees',
+  async (query: string) => {
+    const response = await apiService.searchTalents(query, 'Interview')
+    return response
+  },
+)
 
 export const getTalentCV = createAsyncThunk(
-    'getTalentCV',
-    async (id: number) => {
-        const response = await apiService.getCV(id);
-        return response;
-    }
-);
-
+  'getTalentCV',
+  async (id: number) => {
+    const response = await apiService.getCV(id)
+    return response
+  },
+)
 
 const talentsSlice = createSlice({
-    name: 'talents',
-    initialState,
-    reducers: {},
-    extraReducers: (builder) => {
-        builder
-            .addCase(getTalents.pending, (state) => {
-                state.isLoading = true
-            })
-            .addCase(getTalents.fulfilled, (state, action) => {
-                state.talents = action.payload;
-            })
-            .addCase(getTalents.rejected, (state, action) => {
+  name: 'talents',
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(getTalents.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(getTalents.fulfilled, (state, action) => {
+        state.talents = action.payload
+      })
+      .addCase(getTalents.rejected, (state, action) => {})
+      .addCase(getTalentsPageable.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(getTalentsPageable.fulfilled, (state, action) => {
+        state.talents = action.payload.content
+        state.talentsPageable = action.payload
+      })
+      .addCase(getTalentsPageable.rejected, (state, action) => {})
+      .addCase(getInterviewees.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(getInterviewees.fulfilled, (state, action) => {
+        state.interviewees = action.payload
+      })
+      .addCase(getInterviewees.rejected, (state, action) => {})
+      .addCase(searchTalents.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(searchTalents.fulfilled, (state, action) => {
+        state.talents = action.payload
+      })
+      .addCase(searchTalents.rejected, (state, action) => {})
+      .addCase(searchInterviewees.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(searchInterviewees.fulfilled, (state, action) => {
+        state.interviewees = action.payload
+      })
+      .addCase(searchInterviewees.rejected, (state, action) => {})
+  },
+})
 
-            })
-            .addCase(getInterviewees.pending, (state) => {
-                state.isLoading = true
-            })
-            .addCase(getInterviewees.fulfilled, (state, action) => {
-                state.interviewees = action.payload;
-            })
-            .addCase(getInterviewees.rejected, (state, action) => {
-
-            })
-            .addCase(getTalentCV.fulfilled, (state, action) => {
-                state.cvURL = action.payload
-            });
-    },
-});
-
-export const talentsActions = talentsSlice.actions;
-export default talentsSlice.reducer;
+export const talentsActions = talentsSlice.actions
+export default talentsSlice.reducer
