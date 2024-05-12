@@ -1,5 +1,6 @@
+import ApplicationForm from '@components/ApplicationForm'
 import Auth from '@components/Auth'
-import Form from '@components/Form'
+import InterviewerModal from '@components/InterviewerModal'
 import Interviewers from '@components/Interviewers'
 import Interviews from '@components/Interviews'
 import { Login } from '@components/Login'
@@ -18,7 +19,6 @@ import JobApplicationForm from './components/JobApplicationForm'
 import PreviousLogin from './components/PreviousLogin'
 import PreviousRegister from './components/PreviousRegister'
 import { history, store } from './store'
-import InterviewerModal from '@components/InterviewerModal'
 
 const App: React.FC = () => {
   return (
@@ -34,7 +34,7 @@ const App: React.FC = () => {
           <Route path="/interviewers" element={<Interviewers />} />
           <Route path="*" element={<NotFoundPage />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/apply" element={<Form />} />
+          <Route path="/apply" element={<ApplicationForm />} />
           <Route
             path="/int"
             element={

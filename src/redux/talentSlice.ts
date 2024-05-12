@@ -37,6 +37,19 @@ const initialState: TalentState = {
   interviewees: undefined,
 }
 
+export const submitApplication = createAsyncThunk(
+  'submitApplication',
+  async ({ talent, file }: { talent: TalentRequestDTO; file: FormData }) => {
+    console.log('talent ' + talent.name)
+    console.log('talent ' + talent.specializationId)
+
+    const response = await apiService
+      .createTalent(talent)
+      .then((talent) => apiService.uploadCV(talent.id, file))
+    return true
+  },
+)
+
 export const getTalents = createAsyncThunk('talents', async () => {
   const response = await apiService.getTalents()
   return response

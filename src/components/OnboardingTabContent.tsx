@@ -7,22 +7,38 @@ import {
   CardBody,
   Chip,
   IconButton,
+  Input,
   Tooltip,
   Typography,
 } from '@material-tailwind/react'
-import { MenteeDto, getMentees } from '@redux/onboardingSlice'
+import {
+  MenteeDto,
+  getMentees,
+  sendOnboardingDocument,
+} from '@redux/onboardingSlice'
 import { useEffect, useState } from 'react'
 import { RootState } from '../store'
-import MentorAssignmentModal from './MentorAssignmentModal'
+import Modal from './Modal'
 
 const OnboardingTabContent: React.FC = () => {
-  const TABLE_HEAD = ['Member', 'Specialization', 'Mentor', 'Status', 'Actions']
-
+  const TABLE_HEAD = [
+    'Talent',
+    'Specialization',
+    'Required Documents',
+    'Actions',
+  ]
   const dispatch = useAppDispatch()
-
   const mentees: MenteeDto[] | undefined = useAppSelector(
     (state: RootState) => state.onboarding.mentees,
   )
+
+  const [documentURL, setDocumentURL] = useState('')
+
+  const handleDocumentSend = (id: number) => {
+    dispatch(sendOnboardingDocument({ id, documentURL }))
+      .then(() => setModalOpen(false))
+      .then(() => dispatch(getMentees()))
+  }
 
   useEffect(() => {
     if (mentees === undefined) {
@@ -63,7 +79,17 @@ const OnboardingTabContent: React.FC = () => {
         </thead>
         <tbody>
           {mentees?.map(
-            ({ firstName, lastName, email, phoneNumber }, index) => {
+            (
+              {
+                id,
+                firstName,
+                lastName,
+                email,
+                phoneNumber,
+                onboardingDocumentSent,
+              },
+              index,
+            ) => {
               const isLast = index === mentees.length - 1
               const classes = isLast
                 ? 'p-4'
@@ -124,35 +150,56 @@ const OnboardingTabContent: React.FC = () => {
                       variant="small"
                       color="blue-gray"
                       className="font-normal"
-                      placeholder={undefined}
                     >
-                      <Button
-                        variant="outlined"
-                        size="sm"
-                        placeholder={undefined}
-                        onClick={() => setModalOpen(true)}
-                      >
-                        assign
-                      </Button>
+                      {onboardingDocumentSent ? (
+                        <div className="w-max">
+                          <Chip
+                            variant="ghost"
+                            size="sm"
+                            value="Sent"
+                            color="green"
+                          />
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outlined"
+                          size="sm"
+                          onClick={() => setModalOpen(true)}
+                        >
+                          Send
+                        </Button>
+                      )}
                       {modalOpen && (
-                        <MentorAssignmentModal
-                          closeModal={() => console.log()}
+                        <Modal
+                          title="Send onboarding document"
+                          cancelButtonLabel="Cancel"
+                          cancelButtonAction={() => setModalOpen(false)}
+                          submitButtonLabel="Send"
+                          submitButtonAction={() => handleDocumentSend(id)}
+                          children={
+                            <div className="w-full">
+                              <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="mb-2 font-medium"
+                              >
+                                Document URL
+                              </Typography>
+                              <Input
+                                size="lg"
+                                onChange={(e) => setDocumentURL(e.target.value)}
+                                labelProps={{
+                                  className: 'hidden',
+                                }}
+                                className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
+                              />
+                            </div>
+                          }
                           size="md"
                         />
                       )}
                     </Typography>
                   </td>
-                  <td className={classes}>
-                    <div className="w-max">
-                      <Chip
-                        variant="ghost"
-                        size="sm"
-                        value={status}
-                        color={status === 'REJECTED' ? 'red' : 'blue-gray'}
-                      />
-                    </div>
-                  </td>
-
                   <td className={classes}>
                     <Tooltip content="Edit User">
                       <IconButton variant="text" placeholder={undefined}>

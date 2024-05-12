@@ -14,6 +14,7 @@ import {
 } from '@material-tailwind/react'
 import { Interviewer } from '@redux/interviewerSlice'
 import { useState } from 'react'
+import InterviewerModal from './InterviewerModal'
 import Modal from './Modal'
 
 const TABLE_HEAD = ['Interviewer', 'Position', 'Actions']
@@ -69,17 +70,25 @@ const TABLE_ROWS = [
 const Interviewers: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [interviewerToDelete, setInterviewerToDelete] = useState<Interviewer>()
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [updateModalOpen, setUpdateModalOpen] = useState(false)
+  const [interviewerToUpdate, setInterviewerToUpdate] = useState<Interviewer>()
 
   const handleDeleteInterviewer = (interviewer: Interviewer) => {
-    // Perform deletion logic here
-    // After deletion, close the modal and reset interviewerToDelete
     setShowDeleteModal(true)
     setInterviewerToDelete(interviewer)
   }
 
+  const handleUpdateInterviewer = (interviewer: Interviewer) => {
+    setUpdateModalOpen(true)
+    setInterviewerToUpdate(interviewer)
+  }
+
   const int: Interviewer = {
-    id: 1,
-    name: 'Poghos',
+    firstName: 'Poghos',
+    lastName: 'a',
+    email: 'a@gmail.com',
+    position: 'senior dev',
   }
 
   return (
@@ -98,8 +107,13 @@ const Interviewers: React.FC = () => {
               </Typography>
             </div>
             <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-              <Button className="flex items-center gap-3" size="sm">
-                <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add member
+              <Button
+                className="flex items-center gap-3"
+                size="sm"
+                onClick={() => setAddModalOpen(true)}
+              >
+                <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add
+                interviewer
               </Button>
             </div>
           </div>
@@ -180,7 +194,10 @@ const Interviewers: React.FC = () => {
                     </td>
                     <td className={classes}>
                       <Tooltip content="Edit">
-                        <IconButton variant="text">
+                        <IconButton
+                          variant="text"
+                          onClick={() => handleUpdateInterviewer(int)}
+                        >
                           <PencilIcon className="h-4 w-4" />
                         </IconButton>
                       </Tooltip>
@@ -222,9 +239,24 @@ const Interviewers: React.FC = () => {
           cancelButtonLabel="Delete"
           cancelButtonAction={() => setShowDeleteModal(false)}
         >
-          Are you sure you want to delete {interviewerToDelete?.name} from the
-          interviewers' list?
+          Are you sure you want to delete {interviewerToDelete?.firstName} from
+          the interviewers' list?
         </Modal>
+      )}
+      {addModalOpen && (
+        <InterviewerModal
+          closeModal={() => setAddModalOpen(false)}
+          size="lg"
+          isEdit={false}
+        />
+      )}
+      {updateModalOpen && (
+        <InterviewerModal
+          closeModal={() => setUpdateModalOpen(false)}
+          size="lg"
+          isEdit={true}
+          interviewer={interviewerToUpdate}
+        />
       )}
     </>
   )

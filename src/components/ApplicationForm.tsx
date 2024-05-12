@@ -14,10 +14,11 @@ import {
   Typography,
 } from '@material-tailwind/react'
 import { Specialization, getSpecializations } from '@redux/specializationSlice'
-import React, { useEffect } from 'react'
+import { TalentRequestDTO, submitApplication } from '@redux/talentSlice'
+import React, { useEffect, useState } from 'react'
 import { RootState } from '../store'
 
-const Form: React.FC = () => {
+const ApplicationForm: React.FC = () => {
   const dispatch = useAppDispatch()
 
   const specializations: Specialization[] | undefined = useAppSelector(
@@ -25,12 +26,55 @@ const Form: React.FC = () => {
   )
 
   useEffect(() => {
-    console.log('fetvhing')
     if (specializations === undefined) {
       dispatch(getSpecializations())
     }
   }, [specializations])
-  //bg-gradient-to-r from-cyan-500 to-blue-500 pt-2 pb-2
+
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const [name, setName] = useState('')
+  const [surname, setSurname] = useState('')
+  const [email, setEmail] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [specializationId, setSpecializationId] = useState(0)
+  const [cv, setCv] = useState<File>()
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const talent: TalentRequestDTO = {
+      name,
+      surname,
+      email,
+      phoneNumber,
+      specializationId,
+    }
+
+    if (!cv) {
+      console.error('No file selected')
+      return
+    }
+    const file = new FormData()
+    file.append('file', cv)
+
+    dispatch(submitApplication({ talent, file }))
+
+    setName('')
+    setSurname('')
+    setEmail('')
+    setPhoneNumber('')
+    setSpecializationId(0)
+    setCv(undefined)
+
+    setModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setModalOpen(false)
+  }
+
+  const isDisabled = false
 
   return (
     <>
@@ -57,7 +101,10 @@ const Form: React.FC = () => {
                 placeholder={undefined}
               >
                 <TabPanel value="card" className="p-0">
-                  <form className="mt-2 flex flex-col gap-4">
+                  <form
+                    className="mt-2 flex flex-col gap-4"
+                    onSubmit={handleSubmit}
+                  >
                     <div className="my-6 space-y-4">
                       <Typography
                         variant="small"
@@ -68,8 +115,10 @@ const Form: React.FC = () => {
                         Name
                       </Typography>
                       <Input
-                        type="email"
-                        placeholder="name@mail.com"
+                        type="text"
+                        placeholder="Name"
+                        onChange={(e) => setName(e.target.value)}
+                        required
                         className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                         labelProps={{
                           className: 'before:content-none after:content-none',
@@ -85,8 +134,10 @@ const Form: React.FC = () => {
                         Surname
                       </Typography>
                       <Input
-                        type="email"
-                        placeholder="name@mail.com"
+                        type="text"
+                        placeholder="Surname"
+                        onChange={(e) => setSurname(e.target.value)}
+                        required
                         className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                         labelProps={{
                           className: 'before:content-none after:content-none',
@@ -103,7 +154,9 @@ const Form: React.FC = () => {
                       </Typography>
                       <Input
                         type="email"
-                        placeholder="name@mail.com"
+                        placeholder="example@email.com"
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
                         className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                         labelProps={{
                           className: 'before:content-none after:content-none',
@@ -119,8 +172,10 @@ const Form: React.FC = () => {
                         Phone number
                       </Typography>
                       <Input
-                        type="email"
-                        placeholder="name@mail.com"
+                        type="tel"
+                        placeholder="123456789"
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        required
                         className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                         labelProps={{
                           className: 'before:content-none after:content-none',
@@ -135,18 +190,27 @@ const Form: React.FC = () => {
                       >
                         Position
                       </Typography>
-                      {/* <Select
-                                            color="blue"
-                                            variant="outlined" placeholder={undefined}                                        >
-                                            {specializations?.map(item => (
-                                                <Option key={item.id.toString()}>
-                                                    {item.specialization}
-                                                </Option>
-                                            ))}
-                                            {specializations === undefined && (
-                                                <Option disabled>No positions are available at this time</Option>
-                                            )}
-                                        </Select> */}
+                      <Select
+                        color="blue"
+                        variant="outlined"
+                        onChange={(e) => setSpecializationId(Number(e))}
+                        placeholder={undefined}
+                      >
+                        {specializations === undefined ? (
+                          <Option disabled>
+                            No positions are available at this time
+                          </Option>
+                        ) : (
+                          specializations?.map((item) => (
+                            <Option
+                              key={item.id.toString()}
+                              value={item.id.toString()}
+                            >
+                              {item.specialization}
+                            </Option>
+                          ))
+                        )}
+                      </Select>
                       <Typography
                         variant="small"
                         color="blue-gray"
@@ -160,6 +224,13 @@ const Form: React.FC = () => {
                         id="cv"
                         name="cv"
                         accept=".pdf,.doc,.docx"
+                        required
+                        onChange={(e) => {
+                          const file = e.target.files ? e.target.files[0] : null
+                          if (file) {
+                            setCv(file)
+                          }
+                        }}
                         className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                         labelProps={{
                           className: 'before:content-none after:content-none',
@@ -167,7 +238,7 @@ const Form: React.FC = () => {
                         crossOrigin={undefined}
                       />
                     </div>
-                    <Button size="lg" placeholder={undefined}>
+                    <Button size="lg" type="submit" placeholder={undefined}>
                       Submit application
                     </Button>
                   </form>
@@ -180,4 +251,4 @@ const Form: React.FC = () => {
     </>
   )
 }
-export default Form
+export default ApplicationForm

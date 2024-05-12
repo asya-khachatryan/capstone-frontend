@@ -7,7 +7,6 @@ import {
   DialogHeader,
   Option,
   Select,
-  Typography,
 } from '@material-tailwind/react'
 import { MentorDto, getMentors } from '@redux/onboardingSlice'
 import React, { useEffect } from 'react'
@@ -57,11 +56,15 @@ const MentorAssignmentModal: React.FC<ModalProps> = ({ closeModal, size }) => {
             onPointerEnterCapture={undefined}
             onPointerLeaveCapture={undefined}
           >
-            {mentors?.map((mentor) => (
-              <Option key={mentor.id.toString()}>
-                {mentor.firstName + ' ' + mentor.lastName}
-              </Option>
-            ))}
+            {mentors === undefined ? (
+              <Option disabled>No mentors are available at this time</Option>
+            ) : (
+              mentors?.map((mentor) => (
+                <Option key={mentor.id.toString()}>
+                  {mentor.firstName + ' ' + mentor.lastName}
+                </Option>
+              ))
+            )}
           </Select>
         </DialogBody>
         <DialogFooter placeholder={undefined}>

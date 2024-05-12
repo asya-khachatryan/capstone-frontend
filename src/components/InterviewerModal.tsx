@@ -6,24 +6,41 @@ import {
   DialogFooter,
   DialogHeader,
   Input,
-  Option,
-  Select,
   Typography,
 } from '@material-tailwind/react'
+import { Interviewer, createInterviewer } from '@redux/interviewerSlice'
 import { Specialization, getSpecializations } from '@redux/specializationSlice'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { RootState } from '../store'
 
 interface ModalProps {
   closeModal: () => void
   size: any
+  isEdit: boolean
+  interviewer?: Interviewer
 }
 
-const InterviewerModal: React.FC<ModalProps> = ({ closeModal, size }) => {
+const InterviewerModal: React.FC<ModalProps> = ({
+  closeModal,
+  size,
+  isEdit,
+  interviewer,
+}) => {
   const dispatch = useAppDispatch()
 
   const specializations: Specialization[] | undefined = useAppSelector(
     (state: RootState) => state.specialization.specializations,
+  )
+
+  const [firstName, setFirstName] = useState(
+    isEdit ? interviewer?.firstName || '' : '',
+  )
+  const [lastName, setLastName] = useState(
+    isEdit ? interviewer?.lastName || '' : '',
+  )
+  const [email, setEmail] = useState(isEdit ? interviewer?.email || '' : '')
+  const [position, setPosition] = useState(
+    isEdit ? interviewer?.position || '' : '',
   )
 
   useEffect(() => {
@@ -33,6 +50,24 @@ const InterviewerModal: React.FC<ModalProps> = ({ closeModal, size }) => {
   }, [specializations])
 
   const handleOpen = (value: any) => (size = value)
+
+  const handleSave = () => {
+    const interviewer: Interviewer = {
+      firstName,
+      lastName,
+      email,
+      position,
+    }
+    dispatch(createInterviewer(interviewer))
+      .then(() => {
+        setFirstName('')
+        setLastName('')
+        setEmail('')
+        setPosition('')
+      })
+      .then(() => closeModal())
+    // .then(() => dispatch(getInterviewers()))
+  }
 
   return (
     <>
@@ -67,6 +102,8 @@ const InterviewerModal: React.FC<ModalProps> = ({ closeModal, size }) => {
                   className: 'hidden',
                 }}
                 className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
+                onChange={(e) => setFirstName(e.target.value)}
+                value={firstName}
               />
             </div>
             <div className="w-full">
@@ -83,6 +120,8 @@ const InterviewerModal: React.FC<ModalProps> = ({ closeModal, size }) => {
                   className: 'hidden',
                 }}
                 className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
+                onChange={(e) => setLastName(e.target.value)}
+                value={lastName}
               />
             </div>
           </div>
@@ -101,6 +140,8 @@ const InterviewerModal: React.FC<ModalProps> = ({ closeModal, size }) => {
                   className: 'hidden',
                 }}
                 className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
               />
             </div>
             <div className="w-full">
@@ -111,14 +152,15 @@ const InterviewerModal: React.FC<ModalProps> = ({ closeModal, size }) => {
               >
                 Position
               </Typography>
-              <Select variant="outlined" placeholder={undefined}>
-                text
-                {specializations?.map((item) => (
-                  <Option key={item.id.toString()} value={item.id.toString()}>
-                    {item.specialization}
-                  </Option>
-                ))}
-              </Select>
+              <Input
+                size="lg"
+                labelProps={{
+                  className: 'hidden',
+                }}
+                className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
+                onChange={(e) => setPosition(e.target.value)}
+                value={position}
+              />
             </div>
           </div>
         </DialogBody>
@@ -132,8 +174,13 @@ const InterviewerModal: React.FC<ModalProps> = ({ closeModal, size }) => {
           >
             <span>Cancel</span>
           </Button>
-          <Button variant="gradient" color="green" placeholder={undefined}>
-            <span>Save</span>
+          <Button
+            variant="gradient"
+            color="green"
+            placeholder={undefined}
+            onClick={handleSave}
+          >
+            <span>{isEdit ? 'Update' : 'Save'}</span>
           </Button>
         </DialogFooter>
       </Dialog>

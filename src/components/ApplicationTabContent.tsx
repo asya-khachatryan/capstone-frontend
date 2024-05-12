@@ -20,7 +20,7 @@ import Modal from './Modal'
 
 const ApplicationTabContent: React.FC = () => {
   const TABLE_HEAD = [
-    'Member',
+    'Talent',
     'Specialization',
     'Status',
     'Date Applied',

@@ -1,4 +1,5 @@
 import { Credentials, UserDTO, UserProfileDTO } from '@redux/authSlice'
+import { Interviewer } from '@redux/interviewerSlice'
 import { MenteeDto, MentorDto } from '@redux/onboardingSlice'
 import { Specialization } from '@redux/specializationSlice'
 import { TalentRequestDTO, TalentResponseDTO } from '@redux/talentSlice'
@@ -37,20 +38,20 @@ class ApiService {
     })
   }
 
-  updateUser(userDTO: UserDTO) {
-    return ky
-      .put(`${this.server_domain_endpoint}/user/${userDTO.username}`, {
-        json: userDTO,
-      })
-      .json<UserDTO>()
-  }
-
   getCurrentUser() {
     return ky
       .get(`${this.server_domain_endpoint}/user/me`, {
         credentials: 'include',
       })
       .json<UserProfileDTO>()
+  }
+
+  updateUser(userDTO: UserDTO) {
+    return ky
+      .put(`${this.server_domain_endpoint}/user/${userDTO.username}`, {
+        json: userDTO,
+      })
+      .json<UserDTO>()
   }
 
   getSpecializations() {
@@ -117,6 +118,32 @@ class ApiService {
 
   getCV(id: number) {
     return ky.get(`${this.server_domain_endpoint}/talent/cv/${id}`).text()
+  }
+
+  sendOnboardingDocument(menteeId: number, documentUrl: string) {
+    return ky.post(
+      `${this.server_domain_endpoint}/mentee/${menteeId}/onboarding/email`,
+      {
+        body: documentUrl,
+        credentials: 'include',
+      },
+    )
+  }
+
+  getInterviewers(request: PageableRequest) {
+    return ky
+      .get(
+        `${this.server_domain_endpoint}/interviewers?size=${request.size}&page=${request.page}&sort=${request.sort}`,
+      )
+      .json<PageableResponse<Interviewer>>()
+  }
+
+  createInterviewer(interviewer: Interviewer) {
+    return ky
+      .post(`${this.server_domain_endpoint}/interviewer`, {
+        json: interviewer,
+      })
+      .json<Interviewer>()
   }
 }
 

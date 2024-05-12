@@ -17,7 +17,13 @@ import { RootState } from '../store'
 import Modal from './Modal'
 
 const InterviewTabContent: React.FC = () => {
-  const TABLE_HEAD = ['Member', 'Specialization', 'Status', 'Next Step', '']
+  const TABLE_HEAD = [
+    'Talent',
+    'Specialization',
+    'Interviewer list',
+    'Status',
+    'Next Step',
+  ]
 
   const dispatch = useAppDispatch()
 

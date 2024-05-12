@@ -2,7 +2,7 @@ import apiService from '@api/service'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 export interface UserDto {
-  id: string
+  id: number
   firstName: string
   lastName: string
   email: string
@@ -14,6 +14,7 @@ export interface UserDto {
 export interface MenteeDto extends UserDto {
   mentorId: number
   roadmapId: number
+  onboardingDocumentSent: boolean
 }
 
 export interface MentorDto extends UserDto {}
@@ -39,6 +40,14 @@ export const getMentors = createAsyncThunk('mentors', async () => {
   const response = await apiService.getMentors()
   return response
 })
+
+export const sendOnboardingDocument = createAsyncThunk(
+  'mentees/sendOnboardingDocument',
+  async ({ id, documentURL }: { id: number; documentURL: string }) => {
+    const response = await apiService.sendOnboardingDocument(id, documentURL)
+    return response
+  },
+)
 
 const onboardingSlice = createSlice({
   name: 'onboarding',
