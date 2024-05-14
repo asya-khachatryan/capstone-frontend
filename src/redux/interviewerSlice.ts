@@ -1,6 +1,7 @@
 import apiService from '@api/service'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { PageableRequest, PageableResponse } from 'services/types'
+
 export interface Interviewer {
   id?: number
   firstName: string
@@ -29,6 +30,22 @@ export const createInterviewer = createAsyncThunk(
   },
 )
 
+export const updateInterviewer = createAsyncThunk(
+  'updateInterviewer',
+  async ({ id, interviewer }: { id: number; interviewer: Interviewer }) => {
+    const response = await apiService.updateInterviewer(id, interviewer)
+    return response
+  },
+)
+
+export const deleteInterviewer = createAsyncThunk(
+  'deleteInterviewer',
+  async (id: number) => {
+    const response = await apiService.deleteInterviewer(id)
+    return response
+  },
+)
+
 export const getInterviewers = createAsyncThunk(
   'getInterviewers',
   async (request: PageableRequest) => {
@@ -37,7 +54,7 @@ export const getInterviewers = createAsyncThunk(
   },
 )
 
-const specializationsSlice = createSlice({
+const interviewerSlice = createSlice({
   name: 'interviewers',
   initialState,
   reducers: {},
@@ -54,5 +71,5 @@ const specializationsSlice = createSlice({
   },
 })
 
-export const specializaionActions = specializationsSlice.actions
-export default specializationsSlice.reducer
+export const interviewerActions = interviewerSlice.actions
+export default interviewerSlice.reducer

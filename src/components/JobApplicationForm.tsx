@@ -153,7 +153,9 @@ const JobApplicationForm: React.FC = () => {
               disabled={isDisabled}
             >
               {specializations?.map((item) => (
-                <option key={item.id.toString()}>{item.specialization}</option>
+                <option key={item.id.toString()}>
+                  {item.specializationName}
+                </option>
               ))}
             </select>
           </div>

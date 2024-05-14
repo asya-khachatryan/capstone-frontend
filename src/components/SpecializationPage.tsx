@@ -1,6 +1,6 @@
 import NavigationBar from '@components/Navbar'
 import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
-import { PencilIcon, TrashIcon, UserPlusIcon } from '@heroicons/react/24/solid'
+import { PencilIcon, UserPlusIcon } from '@heroicons/react/24/solid'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
   Button,
@@ -8,55 +8,38 @@ import {
   CardBody,
   CardFooter,
   CardHeader,
+  Chip,
   IconButton,
   Tooltip,
   Typography,
 } from '@material-tailwind/react'
-import {
-  Interviewer,
-  deleteInterviewer,
-  getInterviewers,
-} from '@redux/interviewerSlice'
+import { Specialization, getSpecializations } from '@redux/specializationSlice'
 import { useEffect, useState } from 'react'
 import { RootState } from 'store'
-import InterviewerModal from './InterviewerModal'
-import Modal from './Modal'
+import SpecializationModal from './SpecializationModal'
 
-const TABLE_HEAD = ['Interviewer', 'Email', 'Position', 'Actions']
+const TABLE_HEAD = ['Specialization', 'Status', 'Actions']
 
-const Interviewers: React.FC = () => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [interviewerToDelete, setInterviewerToDelete] = useState<Interviewer>()
+const SpecializationPage: React.FC = () => {
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
-  const [interviewerToUpdate, setInterviewerToUpdate] = useState<Interviewer>()
+  const [specializationToUpdate, setSpecializationToUpdate] =
+    useState<Specialization>()
 
-  const interviewers: Interviewer[] | undefined = useAppSelector(
-    (state: RootState) => state.interviewer.interviewers,
+  const specializations: Specialization[] | undefined = useAppSelector(
+    (state: RootState) => state.specialization.specializations,
   )
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    if (interviewers === undefined) {
-      dispatch(getInterviewers({ size: 2, page: 0, sort: 'email,ASC' }))
+    if (specializations === undefined) {
+      dispatch(getSpecializations())
     }
-  }, [interviewers])
+  }, [specializations])
 
-  const handleDeleteButtonClick = (interviewer: Interviewer) => {
-    setShowDeleteModal(true)
-    setInterviewerToDelete(interviewer)
-  }
-
-  const handleDeleteInterviewer = () => {
-    dispatch(deleteInterviewer(interviewerToDelete?.id!)).then(() =>
-      setShowDeleteModal(false),
-    )
-    // .then(dispatch(getInterviewers()))
-  }
-
-  const handleUpdateInterviewer = (interviewer: Interviewer) => {
+  const handleUpdateSpecialization = (specialization: Specialization) => {
     setUpdateModalOpen(true)
-    setInterviewerToUpdate(interviewer)
+    setSpecializationToUpdate(specialization)
   }
 
   return (
@@ -68,10 +51,10 @@ const Interviewers: React.FC = () => {
           <div className="mb-8 flex items-center justify-between gap-8">
             <div>
               <Typography variant="h5" color="blue-gray">
-                Interviewers list
+                Specializations list
               </Typography>
               <Typography color="gray" className="mt-1 font-normal">
-                See information about all interviewers
+                See information about all specializations
               </Typography>
             </div>
             <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
@@ -81,7 +64,7 @@ const Interviewers: React.FC = () => {
                 onClick={() => setAddModalOpen(true)}
               >
                 <UserPlusIcon strokeWidth={2} className="h-4 w-4" />
-                Add an interviewer
+                Add a specialization
               </Button>
             </div>
           </div>
@@ -113,15 +96,15 @@ const Interviewers: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {interviewers?.map(
-                ({ firstName, lastName, email, position }, index) => {
-                  const isLast = index === interviewers.length - 1
+              {specializations?.map(
+                ({ specializationName: specialization, active }, index) => {
+                  const isLast = index === specializations.length - 1
                   const classes = isLast
                     ? 'p-4'
                     : 'p-4 border-b border-blue-gray-50'
 
                   return (
-                    <tr key={name}>
+                    <tr key={specialization}>
                       <td className={classes}>
                         <div className="flex items-center gap-3">
                           <div className="flex flex-col">
@@ -130,31 +113,19 @@ const Interviewers: React.FC = () => {
                               color="blue-gray"
                               className="font-normal"
                             >
-                              {firstName + ' ' + lastName}
+                              {specialization}
                             </Typography>
                           </div>
                         </div>
                       </td>
                       <td className={classes}>
-                        <div className="flex flex-col">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal"
-                          >
-                            {email}
-                          </Typography>
-                        </div>
-                      </td>
-                      <td className={classes}>
-                        <div className="flex flex-col">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal"
-                          >
-                            {position}
-                          </Typography>
+                        <div className="w-max">
+                          <Chip
+                            variant="ghost"
+                            size="sm"
+                            value={active ? 'Active' : 'Inactive'}
+                            color={active ? 'green' : 'red'}
+                          />
                         </div>
                       </td>
                       <td className={classes}>
@@ -162,20 +133,10 @@ const Interviewers: React.FC = () => {
                           <IconButton
                             variant="text"
                             onClick={() =>
-                              handleUpdateInterviewer(interviewers[index])
+                              handleUpdateSpecialization(specializations[index])
                             }
                           >
                             <PencilIcon className="h-4 w-4" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip content="Delete">
-                          <IconButton
-                            variant="text"
-                            onClick={() =>
-                              handleDeleteButtonClick(interviewers[index])
-                            }
-                          >
-                            <TrashIcon className="h-4 w-4" />
                           </IconButton>
                         </Tooltip>
                       </td>
@@ -200,35 +161,22 @@ const Interviewers: React.FC = () => {
           </div>
         </CardFooter>
       </Card>
-      {showDeleteModal && (
-        <Modal
-          title="Delete Interviewer"
-          size="xl"
-          submitButtonLabel="Cancel"
-          submitButtonAction={() => setShowDeleteModal(false)}
-          cancelButtonLabel="Delete"
-          cancelButtonAction={() => handleDeleteInterviewer()}
-        >
-          Are you sure you want to delete {interviewerToDelete?.firstName} from
-          the interviewers' list?
-        </Modal>
-      )}
       {addModalOpen && (
-        <InterviewerModal
+        <SpecializationModal
           closeModal={() => setAddModalOpen(false)}
           size="lg"
           isEdit={false}
         />
       )}
       {updateModalOpen && (
-        <InterviewerModal
+        <SpecializationModal
           closeModal={() => setUpdateModalOpen(false)}
           size="lg"
           isEdit={true}
-          interviewer={interviewerToUpdate}
+          specialization={specializationToUpdate}
         />
       )}
     </>
   )
 }
-export default Interviewers
+export default SpecializationPage

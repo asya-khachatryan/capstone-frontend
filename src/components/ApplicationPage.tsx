@@ -8,37 +8,59 @@ import {
   Typography,
 } from '@material-tailwind/react'
 import {
-  TalentResponseDTO,
+  Talent,
   getTalentCV,
-  getTalents,
   getTalentsPageable,
+  talentStatusMap,
 } from '@redux/talentSlice'
 import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { RootState } from '../store'
 import Modal from './Modal'
+import ScheduleInterviewModal from './ScheduleInterviewModal'
 
-const ApplicationTabContent: React.FC = () => {
+type SortCol = {
+  name: string
+  directionAsc: boolean
+}
+
+const ApplicationPage: React.FC = () => {
   const TABLE_HEAD = [
     'Talent',
     'Specialization',
     'Status',
     'Date Applied',
     'CV',
+    'Actions',
   ]
 
+  const [sortCol, setSortCol] = useState<SortCol | null>(null)
+
+  const selectSortCol = useCallback(
+    (colName: string) => {
+      if (sortCol?.name === colName) {
+        setSortCol({ name: colName, directionAsc: !sortCol.directionAsc })
+      } else {
+        setSortCol({ name: colName, directionAsc: true })
+      }
+    },
+    [sortCol, setSortCol],
+  )
+
   const dispatch = useAppDispatch()
-  const talents: TalentResponseDTO[] | undefined = useAppSelector(
+  const talents: Talent[] | undefined = useAppSelector(
     (state: RootState) => state.talent.talents,
   )
 
   useEffect(() => {
     if (talents === undefined) {
-      dispatch(getTalentsPageable({ size: 2, page: 0, sort: 'email,ASC' }))
-      console.log(talents)
+      dispatch(getTalentsPageable({ size: 10, page: 0, sort: 'email,ASC' }))
     }
-    console.log(talents)
   }, [talents])
+
+  useEffect(() => {
+    dispatch(getTalentsPageable({ size: 2, page: 0, sort: 'email,ASC' }))
+  }, [sortCol])
 
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -54,6 +76,14 @@ const ApplicationTabContent: React.FC = () => {
       .then((a) => setUrl(a))
       .catch((a) => console.log(a))
     setModalOpen(true)
+  }
+
+  const [inviteToInterview, setInviteToInterview] = useState(false)
+  const [talentToInvite, setTalentToInvite] = useState<Talent>()
+
+  const handleInviteToInterviewButtonClick = (talent: Talent) => {
+    setInviteToInterview(true)
+    setTalentToInvite(talent)
   }
 
   return (
@@ -148,7 +178,7 @@ const ApplicationTabContent: React.FC = () => {
                           className="font-normal"
                           placeholder={undefined}
                         >
-                          {specialization.specialization}
+                          {specialization.specializationName}
                         </Typography>
                       </div>
                     </td>
@@ -157,7 +187,7 @@ const ApplicationTabContent: React.FC = () => {
                         <Chip
                           variant="ghost"
                           size="sm"
-                          value={status}
+                          value={talentStatusMap.get(status)}
                           color={status === 'REJECTED' ? 'red' : 'blue-gray'}
                         />
                       </div>
@@ -191,6 +221,37 @@ const ApplicationTabContent: React.FC = () => {
                         </Button>
                       </Typography>
                     </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                        placeholder={undefined}
+                      >
+                        <div className="flex gap-2 mb-2">
+                          <Button
+                            variant="filled"
+                            color="green"
+                            size="sm"
+                            placeholder={undefined}
+                            onClick={() =>
+                              handleInviteToInterviewButtonClick(talents[index])
+                            }
+                          >
+                            Invite to interview
+                          </Button>
+                          <Button
+                            variant="filled"
+                            size="sm"
+                            color="red"
+                            placeholder={undefined}
+                            // onClick={() => handleInviteToInterviewButtonClick(talents[index])}
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      </Typography>
+                    </td>
                   </tr>
                 )
               },
@@ -210,8 +271,16 @@ const ApplicationTabContent: React.FC = () => {
           </div>
         </Modal>
       )}
+      {inviteToInterview && (
+        <ScheduleInterviewModal
+          closeModal={() => setInviteToInterview(false)}
+          size="lg"
+          isEdit={false}
+          talent={talentToInvite!}
+        />
+      )}
     </>
   )
 }
 
-export default ApplicationTabContent
+export default ApplicationPage

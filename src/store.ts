@@ -4,12 +4,15 @@ import { createBrowserHistory } from 'history'
 import { combineReducers } from 'redux'
 import { createReduxHistoryContext } from 'redux-first-history'
 
-import specializationReducer from './redux/specializationSlice'
+import specializationReducer from '@redux/specializationSlice'
 import talentReducer from '@redux/talentSlice'
 
-import { docsApi } from './services/docs'
+import interviewReducer from '@redux/interviewSlice'
+import interviewerReducer from '@redux/interviewerSlice'
 import authReducer from './redux/authSlice'
-import onboardingReducer from "@redux/onboardingSlice"
+import { docsApi } from './services/docs'
+
+import onboardingReducer from '@redux/onboardingSlice'
 
 // Setup redux-first-history
 const { createReduxHistory, routerMiddleware, routerReducer } =
@@ -23,6 +26,8 @@ export const store = configureStore({
     specialization: specializationReducer,
     talent: talentReducer,
     onboarding: onboardingReducer,
+    interview: interviewReducer,
+    interviewer: interviewerReducer,
     router: routerReducer,
     [docsApi.reducerPath]: docsApi.reducer,
   }),

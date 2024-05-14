@@ -31,12 +31,18 @@ const OnboardingTabContent: React.FC = () => {
   const mentees: MenteeDto[] | undefined = useAppSelector(
     (state: RootState) => state.onboarding.mentees,
   )
-
+  const [menteeId, setMenteeId] = useState<number>()
   const [documentURL, setDocumentURL] = useState('')
 
-  const handleDocumentSend = (id: number) => {
-    dispatch(sendOnboardingDocument({ id, documentURL }))
-      .then(() => setModalOpen(false))
+  const handleDocumentSend = () => {
+    dispatch(
+      sendOnboardingDocument({ id: menteeId!, documentURL: documentURL }),
+    )
+      .then(() => {
+        setModalOpen(false)
+        setMenteeId(undefined)
+        setDocumentURL(undefined)
+      })
       .then(() => dispatch(getMentees()))
   }
 
@@ -47,10 +53,6 @@ const OnboardingTabContent: React.FC = () => {
   }, [mentees])
 
   const [modalOpen, setModalOpen] = useState(false)
-
-  const handleCloseModal = () => {
-    setModalOpen(false)
-  }
 
   return (
     <CardBody className="overflow-scroll px-0" placeholder={undefined}>
@@ -164,7 +166,10 @@ const OnboardingTabContent: React.FC = () => {
                         <Button
                           variant="outlined"
                           size="sm"
-                          onClick={() => setModalOpen(true)}
+                          onClick={() => {
+                            setMenteeId(id)
+                            setModalOpen(true)
+                          }}
                         >
                           Send
                         </Button>
@@ -175,7 +180,7 @@ const OnboardingTabContent: React.FC = () => {
                           cancelButtonLabel="Cancel"
                           cancelButtonAction={() => setModalOpen(false)}
                           submitButtonLabel="Send"
-                          submitButtonAction={() => handleDocumentSend(id)}
+                          submitButtonAction={() => handleDocumentSend()}
                           children={
                             <div className="w-full">
                               <Typography

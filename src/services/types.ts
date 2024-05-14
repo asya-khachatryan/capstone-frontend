@@ -1,3 +1,5 @@
+import { StringifyOptions } from 'querystring'
+
 export type DocsList = Array<{ name: string; url: string }>
 
 export interface PageableRequest {

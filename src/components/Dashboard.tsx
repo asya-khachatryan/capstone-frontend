@@ -11,27 +11,23 @@ import {
   TabsHeader,
   Typography,
 } from '@material-tailwind/react'
-import {
-  TalentResponseDTO,
-  searchInterviewees,
-  searchTalents,
-} from '@redux/talentSlice'
+import { Talent, searchInterviewees, searchTalents } from '@redux/talentSlice'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageableResponse } from 'services/types'
 import { RootState } from '../store'
-import ApplicationTabContent from './ApplicationTabContent'
+import ApplicationPage from './ApplicationPage'
 import InterviewTabContent from './InterviewTabContent'
 import NavigationBar from './Navbar'
 import OnboardingTabContent from './OnboardingTabContent'
 
 const tabs: { name: string; content: React.ReactNode }[] = [
-  { name: 'Application', content: <ApplicationTabContent /> },
+  { name: 'Application', content: <ApplicationPage /> },
   { name: 'Interview', content: <InterviewTabContent /> },
   { name: 'Onboarding', content: <OnboardingTabContent /> },
 ]
 
-const SortableTable: React.FC = () => {
+const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
@@ -41,8 +37,9 @@ const SortableTable: React.FC = () => {
     setActiveTab(index)
   }
 
-  const talentsPageable: PageableResponse<TalentResponseDTO> | undefined =
-    useAppSelector((state: RootState) => state.talent.talentsPageable)
+  const talentsPageable: PageableResponse<Talent> | undefined = useAppSelector(
+    (state: RootState) => state.talent.talentsPageable,
+  )
 
   const handlePrevious = () => {}
 
@@ -146,4 +143,4 @@ const SortableTable: React.FC = () => {
   )
 }
 
-export default SortableTable
+export default Dashboard

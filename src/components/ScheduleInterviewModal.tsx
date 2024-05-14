@@ -1,4 +1,4 @@
-import { useAppDispatch } from '@hooks/redux'
+import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
   Button,
   Dialog,
@@ -8,76 +8,52 @@ import {
   Input,
   Typography,
 } from '@material-tailwind/react'
-import {
-  Interviewer,
-  createInterviewer,
-  updateInterviewer,
-} from '@redux/interviewerSlice'
+import { InterviewRequestDTO, createInterview } from '@redux/interviewSlice'
+import { Interviewer } from '@redux/interviewerSlice'
+import { Talent } from '@redux/talentSlice'
 import React, { useState } from 'react'
+import { RootState } from '../store'
 
 interface ModalProps {
   closeModal: () => void
   size: any
   isEdit: boolean
   interviewer?: Interviewer
+  talent: Talent
 }
 
-const InterviewerModal: React.FC<ModalProps> = ({
+const ScheduleInterviewModal: React.FC<ModalProps> = ({
   closeModal,
   size,
   isEdit,
   interviewer,
+  talent,
 }) => {
   const dispatch = useAppDispatch()
 
-  const [id, setId] = useState(isEdit ? interviewer?.id || 0 : 0)
+  const talents: Talent[] | undefined = useAppSelector(
+    (state: RootState) => state.talent.talents,
+  )
 
-  const [firstName, setFirstName] = useState(
-    isEdit ? interviewer?.firstName || '' : '',
-  )
-  const [lastName, setLastName] = useState(
-    isEdit ? interviewer?.lastName || '' : '',
-  )
-  const [email, setEmail] = useState(isEdit ? interviewer?.email || '' : '')
-  const [position, setPosition] = useState(
-    isEdit ? interviewer?.position || '' : '',
-  )
+  const [interviewerIds, setInterviewerIds] = useState<number[]>([])
+  const [interviewType, setInterviewType] = useState<string>('')
+  const [talentID, setTalentID] = useState<number>(talent.id)
 
   const handleOpen = (value: any) => (size = value)
 
   const handleSave = () => {
-    const interviewerToSave: Interviewer = {
-      firstName,
-      lastName,
-      email,
-      position,
+    setInterviewerIds([6])
+    const interviewRequest: InterviewRequestDTO = {
+      interviewerIds,
+      interviewType,
+      talentID,
     }
-    dispatch(createInterviewer(interviewerToSave))
+    console.log('here: ' + interviewRequest.interviewType)
+    dispatch(createInterview(interviewRequest))
       .then(() => {
-        setFirstName('')
-        setLastName('')
-        setEmail('')
-        setPosition('')
-      })
-      .then(() => closeModal())
-    // .then(() => dispatch(getInterviewers()))
-  }
-
-  const handleUpdate = (id: number) => {
-    setId(id)
-    const interviewer: Interviewer = {
-      firstName,
-      lastName,
-      email,
-      position,
-    }
-    dispatch(updateInterviewer({ id, interviewer }))
-      .then(() => {
-        setId(0)
-        setFirstName('')
-        setLastName('')
-        setEmail('')
-        setPosition('')
+        setInterviewerIds([])
+        setInterviewType('')
+        setTalentID(0)
       })
       .then(() => closeModal())
     // .then(() => dispatch(getInterviewers()))
@@ -98,7 +74,9 @@ const InterviewerModal: React.FC<ModalProps> = ({
         handler={handleOpen}
         placeholder={undefined}
       >
-        <DialogHeader placeholder={undefined}>Add an interviewer</DialogHeader>
+        <DialogHeader placeholder={undefined}>
+          Schedule an interview
+        </DialogHeader>
         <DialogBody placeholder={undefined}>
           <div className="mb-6 flex flex-col items-end gap-4 md:flex-row">
             <div className="w-full">
@@ -106,9 +84,8 @@ const InterviewerModal: React.FC<ModalProps> = ({
                 variant="small"
                 color="blue-gray"
                 className="mb-2 font-medium"
-                placeholder={undefined}
               >
-                First Name
+                Talent
               </Typography>
               <Input
                 size="lg"
@@ -116,17 +93,18 @@ const InterviewerModal: React.FC<ModalProps> = ({
                   className: 'hidden',
                 }}
                 className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
-                onChange={(e) => setFirstName(e.target.value)}
-                value={firstName}
-              />
+                disabled
+                value={talent.name + ' ' + talent.surname}
+              ></Input>
             </div>
             <div className="w-full">
               <Typography
                 variant="small"
                 color="blue-gray"
                 className="mb-2 font-medium"
+                placeholder={undefined}
               >
-                Last Name
+                Interview type
               </Typography>
               <Input
                 size="lg"
@@ -134,8 +112,7 @@ const InterviewerModal: React.FC<ModalProps> = ({
                   className: 'hidden',
                 }}
                 className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
-                onChange={(e) => setLastName(e.target.value)}
-                value={lastName}
+                onChange={(e) => setInterviewType(e.target.value)}
               />
             </div>
           </div>
@@ -146,35 +123,17 @@ const InterviewerModal: React.FC<ModalProps> = ({
                 color="blue-gray"
                 className="mb-2 font-medium"
               >
-                Email
+                Interviewers
               </Typography>
-              <Input
-                size="lg"
-                labelProps={{
-                  className: 'hidden',
-                }}
-                className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-              />
-            </div>
-            <div className="w-full">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="mb-2 font-medium"
-              >
-                Position
-              </Typography>
-              <Input
-                size="lg"
-                labelProps={{
-                  className: 'hidden',
-                }}
-                className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
-                onChange={(e) => setPosition(e.target.value)}
-                value={position}
-              />
+              {/* <Input
+                                size="lg"
+                                labelProps={{
+                                    className: 'hidden',
+                                }}
+                                className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
+                                onChange={(e) => setPosition(e.target.value)}
+                            /> */}
+              {/* <SearchableSelect options={options} onChange={handleChange} /> */}
             </div>
           </div>
         </DialogBody>
@@ -192,9 +151,7 @@ const InterviewerModal: React.FC<ModalProps> = ({
             variant="gradient"
             color="green"
             placeholder={undefined}
-            onClick={
-              isEdit ? () => handleUpdate(interviewer?.id!) : () => handleSave()
-            }
+            onClick={handleSave}
           >
             <span>{isEdit ? 'Update' : 'Save'}</span>
           </Button>
@@ -204,4 +161,4 @@ const InterviewerModal: React.FC<ModalProps> = ({
   )
 }
 
-export default InterviewerModal
+export default ScheduleInterviewModal

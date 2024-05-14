@@ -45,7 +45,7 @@ const Modal: React.FC<ModalProps> = ({
       >
         <DialogHeader placeholder={undefined}>{title}</DialogHeader>
         <DialogBody placeholder={undefined}>{children}</DialogBody>
-        <DialogFooter placeholder={undefined}>
+        <DialogFooter placeholder={undefined} className="flex space-x-2">
           {cancelButtonLabel && cancelButtonAction && (
             <Button
               variant="text"

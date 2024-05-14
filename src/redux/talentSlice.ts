@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { PageableRequest, PageableResponse } from 'services/types'
 import { Specialization } from './specializationSlice'
 
-export interface TalentRequestDTO {
+export interface TalentCreationRequest {
   name: string
   surname: string
   email: string
@@ -12,7 +12,7 @@ export interface TalentRequestDTO {
   status?: string
 }
 
-export interface TalentResponseDTO {
+export interface Talent {
   id: number
   name: string
   surname: string
@@ -23,11 +23,21 @@ export interface TalentResponseDTO {
   dateApplied: string
 }
 
+export const talentStatusMap = new Map<string, string>([
+  ['APPLIED', 'Applied'],
+  ['INTERVIEW_PREPARATION', 'Interview Preparation'],
+  ['STAGE1_INTERVIEW', 'Stage 1 Interview'],
+  ['STAGE2_INTERVIEW', 'Stage 2 Interview'],
+  ['POSITION_OFFERED', 'Position Offered'],
+  ['REJECTED', 'Rejected'],
+  ['HIRED', 'Hired'],
+])
+
 interface TalentState {
   isLoading: boolean
-  talents?: TalentResponseDTO[]
-  talentsPageable?: PageableResponse<TalentResponseDTO>
-  interviewees?: TalentResponseDTO[]
+  talents?: Talent[]
+  talentsPageable?: PageableResponse<Talent>
+  interviewees?: Talent[]
 }
 
 const initialState: TalentState = {
@@ -39,10 +49,13 @@ const initialState: TalentState = {
 
 export const submitApplication = createAsyncThunk(
   'submitApplication',
-  async ({ talent, file }: { talent: TalentRequestDTO; file: FormData }) => {
-    console.log('talent ' + talent.name)
-    console.log('talent ' + talent.specializationId)
-
+  async ({
+    talent,
+    file,
+  }: {
+    talent: TalentCreationRequest
+    file: FormData
+  }) => {
     const response = await apiService
       .createTalent(talent)
       .then((talent) => apiService.uploadCV(talent.id, file))
@@ -57,8 +70,9 @@ export const getTalents = createAsyncThunk('talents', async () => {
 
 export const getTalentsPageable = createAsyncThunk(
   'talentsPageable',
-  async (request: PageableRequest) => {
+  async (request: PageableRequest, thunkApi) => {
     const response = await apiService.getTalentsPageable(request)
+    // response.nextPage = (pageidx: number) => thunkApi.dispatch(getTalentsPageable(Object.assign({}, request, { page: pageidx })))
     return response
   },
 )

@@ -14,9 +14,10 @@ import {
   Typography,
 } from '@material-tailwind/react'
 import { Specialization, getSpecializations } from '@redux/specializationSlice'
-import { TalentRequestDTO, submitApplication } from '@redux/talentSlice'
+import { TalentCreationRequest, submitApplication } from '@redux/talentSlice'
 import React, { useEffect, useState } from 'react'
 import { RootState } from '../store'
+import Modal from './Modal'
 
 const ApplicationForm: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -40,10 +41,24 @@ const ApplicationForm: React.FC = () => {
   const [specializationId, setSpecializationId] = useState(0)
   const [cv, setCv] = useState<File>()
 
+  const [submitTried, setSubmitTried] = useState(false)
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    setSubmitTried(true)
     e.preventDefault()
 
-    const talent: TalentRequestDTO = {
+    if (
+      name === '' ||
+      surname === '' ||
+      email === '' ||
+      phoneNumber === '' ||
+      specializationId === 0 ||
+      cv === undefined
+    ) {
+      return
+    }
+
+    const talent: TalentCreationRequest = {
       name,
       surname,
       email,
@@ -51,30 +66,20 @@ const ApplicationForm: React.FC = () => {
       specializationId,
     }
 
-    if (!cv) {
-      console.error('No file selected')
-      return
-    }
     const file = new FormData()
     file.append('file', cv)
 
-    dispatch(submitApplication({ talent, file }))
-
-    setName('')
-    setSurname('')
-    setEmail('')
-    setPhoneNumber('')
-    setSpecializationId(0)
-    setCv(undefined)
-
-    setModalOpen(true)
+    dispatch(submitApplication({ talent, file })).then(() => {
+      setName('')
+      setSurname('')
+      setEmail('')
+      setPhoneNumber('')
+      setSpecializationId(0)
+      setCv(undefined)
+      setModalOpen(true)
+      setSubmitTried(false)
+    })
   }
-
-  const handleCloseModal = () => {
-    setModalOpen(false)
-  }
-
-  const isDisabled = false
 
   return (
     <>
@@ -91,7 +96,7 @@ const ApplicationForm: React.FC = () => {
               <BriefcaseIcon className="h-10 w-10 text-white" />
             </div>
             <Typography variant="h5" color="white" placeholder={undefined}>
-              Apply
+              Apply to Talent Journey
             </Typography>
           </CardHeader>
           <CardBody placeholder={undefined}>
@@ -117,8 +122,9 @@ const ApplicationForm: React.FC = () => {
                       <Input
                         type="text"
                         placeholder="Name"
+                        value={name}
                         onChange={(e) => setName(e.target.value)}
-                        required
+                        error={submitTried && name === ''}
                         className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                         labelProps={{
                           className: 'before:content-none after:content-none',
@@ -136,8 +142,9 @@ const ApplicationForm: React.FC = () => {
                       <Input
                         type="text"
                         placeholder="Surname"
+                        value={surname}
                         onChange={(e) => setSurname(e.target.value)}
-                        required
+                        error={submitTried && surname === ''}
                         className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                         labelProps={{
                           className: 'before:content-none after:content-none',
@@ -155,8 +162,9 @@ const ApplicationForm: React.FC = () => {
                       <Input
                         type="email"
                         placeholder="example@email.com"
+                        value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        required
+                        error={submitTried && email === ''}
                         className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                         labelProps={{
                           className: 'before:content-none after:content-none',
@@ -174,8 +182,9 @@ const ApplicationForm: React.FC = () => {
                       <Input
                         type="tel"
                         placeholder="123456789"
+                        value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
-                        required
+                        error={submitTried && phoneNumber === ''}
                         className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                         labelProps={{
                           className: 'before:content-none after:content-none',
@@ -193,8 +202,11 @@ const ApplicationForm: React.FC = () => {
                       <Select
                         color="blue"
                         variant="outlined"
+                        value=""
+                        // label="position"
                         onChange={(e) => setSpecializationId(Number(e))}
                         placeholder={undefined}
+                        error={submitTried && specializationId === 0}
                       >
                         {specializations === undefined ? (
                           <Option disabled>
@@ -203,10 +215,10 @@ const ApplicationForm: React.FC = () => {
                         ) : (
                           specializations?.map((item) => (
                             <Option
-                              key={item.id.toString()}
-                              value={item.id.toString()}
+                              key={item.id?.toString()}
+                              value={item.id?.toString()}
                             >
-                              {item.specialization}
+                              {item.specializationName}
                             </Option>
                           ))
                         )}
@@ -224,7 +236,7 @@ const ApplicationForm: React.FC = () => {
                         id="cv"
                         name="cv"
                         accept=".pdf,.doc,.docx"
-                        required
+                        error={submitTried && cv === undefined}
                         onChange={(e) => {
                           const file = e.target.files ? e.target.files[0] : null
                           if (file) {
@@ -248,6 +260,31 @@ const ApplicationForm: React.FC = () => {
           </CardBody>
         </Card>
       </div>
+      {modalOpen && (
+        <Modal
+          title="Application Received"
+          size="lg"
+          submitButtonLabel="OK"
+          submitButtonAction={() => {
+            setModalOpen(false)
+            setName('')
+            setSurname('')
+            setEmail('')
+            setPhoneNumber('')
+            setSpecializationId(0)
+            setCv(undefined)
+          }}
+        >
+          Thank you for applying to Talent Journey. Your application has been
+          successfully received, you will now receive{' '}
+          <b> a confirmation email</b>.<br></br>
+          <br></br>
+          We appreciate your interest in joining our team. Our hiring team will
+          carefully review your application materials. If your qualifications
+          align with the requirements of the position, our recruiters will get
+          in contact with you.
+        </Modal>
+      )}
     </>
   )
 }

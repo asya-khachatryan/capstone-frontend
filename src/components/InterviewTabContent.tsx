@@ -10,7 +10,7 @@ import {
   Tooltip,
   Typography,
 } from '@material-tailwind/react'
-import { TalentResponseDTO, getInterviewees } from '@redux/talentSlice'
+import { Talent, getInterviewees } from '@redux/talentSlice'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { RootState } from '../store'
@@ -27,7 +27,7 @@ const InterviewTabContent: React.FC = () => {
 
   const dispatch = useAppDispatch()
 
-  const interviewwes: TalentResponseDTO[] | undefined = useAppSelector(
+  const interviewwes: Talent[] | undefined = useAppSelector(
     (state: RootState) => state.talent.interviewees,
   )
 
@@ -127,7 +127,7 @@ const InterviewTabContent: React.FC = () => {
                         className="font-normal"
                         placeholder={undefined}
                       >
-                        {specialization.specialization}
+                        {specialization.specializationName}
                       </Typography>
                     </div>
                   </td>
