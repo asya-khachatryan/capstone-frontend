@@ -6,19 +6,22 @@ import {
   DialogFooter,
   DialogHeader,
   Input,
+  Option,
+  Select,
   Typography,
 } from '@material-tailwind/react'
 import { InterviewRequestDTO, createInterview } from '@redux/interviewSlice'
-import { Interviewer } from '@redux/interviewerSlice'
+import { Interviewer, getInterviewers } from '@redux/interviewerSlice'
 import { Talent } from '@redux/talentSlice'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+
+import { PageableResponse } from 'services/types'
 import { RootState } from '../store'
 
 interface ModalProps {
   closeModal: () => void
   size: any
   isEdit: boolean
-  interviewer?: Interviewer
   talent: Talent
 }
 
@@ -26,7 +29,6 @@ const ScheduleInterviewModal: React.FC<ModalProps> = ({
   closeModal,
   size,
   isEdit,
-  interviewer,
   talent,
 }) => {
   const dispatch = useAppDispatch()
@@ -38,17 +40,25 @@ const ScheduleInterviewModal: React.FC<ModalProps> = ({
   const [interviewerIds, setInterviewerIds] = useState<number[]>([])
   const [interviewType, setInterviewType] = useState<string>('')
   const [talentID, setTalentID] = useState<number>(talent.id)
+  const [selectedInterviewerId, setSelectedInterviewerId] = useState<number>(0)
+  const interviewers: Interviewer[] | undefined = useAppSelector(
+    (state: RootState) => state.interviewer.interviewers,
+  )
+
+  useEffect(() => {
+    if (interviewers === undefined) {
+      dispatch(getInterviewers({ size: 2, page: 0, sort: 'email,ASC' }))
+    }
+  }, [interviewers])
 
   const handleOpen = (value: any) => (size = value)
 
   const handleSave = () => {
-    setInterviewerIds([6])
     const interviewRequest: InterviewRequestDTO = {
       interviewerIds,
       interviewType,
       talentID,
     }
-    console.log('here: ' + interviewRequest.interviewType)
     dispatch(createInterview(interviewRequest))
       .then(() => {
         setInterviewerIds([])
@@ -58,6 +68,8 @@ const ScheduleInterviewModal: React.FC<ModalProps> = ({
       .then(() => closeModal())
     // .then(() => dispatch(getInterviewers()))
   }
+  const interviewersPageable: PageableResponse<Interviewer> | undefined =
+    useAppSelector((state: RootState) => state.interviewer.interviewersPageable)
 
   return (
     <>
@@ -125,15 +137,38 @@ const ScheduleInterviewModal: React.FC<ModalProps> = ({
               >
                 Interviewers
               </Typography>
-              {/* <Input
-                                size="lg"
-                                labelProps={{
-                                    className: 'hidden',
-                                }}
-                                className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
-                                onChange={(e) => setPosition(e.target.value)}
-                            /> */}
-              {/* <SearchableSelect options={options} onChange={handleChange} /> */}
+              <Select
+                color="blue"
+                variant="outlined"
+                value=""
+                // label="position"
+                onChange={(e) => interviewerIds.push(Number(e))}
+                placeholder={undefined}
+              >
+                {interviewers === undefined ? (
+                  <Option disabled>
+                    No positions are available at this time
+                  </Option>
+                ) : (
+                  interviewers?.map((item) => (
+                    <Option
+                      key={item.id?.toString()}
+                      value={item.id?.toString()}
+                    >
+                      {item.firstName + ' ' + item.lastName}
+                    </Option>
+                  ))
+                )}
+              </Select>
+              {/* <Select
+                isSearchable
+                value={selectedInterviewer}
+                onChange={onInterviewerSelect}
+                options={interviewers?.map(interviewer => ({
+                  value: interviewer.id,
+                  label: `${interviewer.firstName} ${interviewer.lastName}`
+                }))}
+              /> */}
             </div>
           </div>
         </DialogBody>

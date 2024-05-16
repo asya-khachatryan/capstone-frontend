@@ -106,6 +106,14 @@ export const getTalentCV = createAsyncThunk(
   },
 )
 
+export const updateTalentStatus = createAsyncThunk(
+  'updateTalentStatus',
+  async ({ id, request }: { id: number; request: TalentCreationRequest }) => {
+    const response = await apiService.updateTalentStatus(id, request)
+    return response
+  },
+)
+
 const talentsSlice = createSlice({
   name: 'talents',
   initialState,

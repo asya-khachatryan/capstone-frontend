@@ -1,5 +1,3 @@
-import { StringifyOptions } from 'querystring'
-
 export type DocsList = Array<{ name: string; url: string }>
 
 export interface PageableRequest {
@@ -26,4 +24,17 @@ export type Sort = {
   empty: boolean
   sorted: boolean
   unsorted: boolean
+}
+
+export function loadOptions<T>(pageableResponse: PageableResponse<T>) {
+  return {
+    options: pageableResponse.content,
+    hasMore:
+      pageableResponse.content.length < pageableResponse.numberOfElements,
+  }
+}
+
+export interface LoadOptionsResult<T> {
+  options: T[]
+  hasMore: boolean
 }

@@ -6,8 +6,8 @@ import { Talent } from './talentSlice'
 
 export interface Interview {
   id?: number
-  startDate: string
-  endDate: string
+  startDate?: string
+  endDate?: string
   interviewType: string
   interviewStatus: string
   interviewFeedback?: InterviewFeedback
@@ -51,12 +51,29 @@ export const getInterviews = createAsyncThunk(
   async (request: PageableRequest) => {},
 )
 
+export const getAllInterviews = createAsyncThunk(
+  'getAllInterviews',
+  async () => {
+    const response = await apiService.getAllInterviewes()
+    return response
+  },
+)
+
 const interviewSlice = createSlice({
   name: 'interviews',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(getAllInterviews.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(getAllInterviews.fulfilled, (state, action) => {
+        state.interviews = action.payload
+        console.log('hey hey')
+        console.log(state.interviews)
+      })
+      .addCase(getAllInterviews.rejected, (state, action) => {})
   },
 })
 

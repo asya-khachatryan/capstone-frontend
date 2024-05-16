@@ -1,6 +1,7 @@
 import NavigationBar from '@components/Navbar'
 import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
 import { PencilIcon } from '@heroicons/react/24/solid'
+import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
   Button,
   Card,
@@ -13,8 +14,10 @@ import {
   Tooltip,
   Typography,
 } from '@material-tailwind/react'
+import { Interview, getAllInterviews } from '@redux/interviewSlice'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { RootState } from 'store'
 import Modal from './Modal'
 
 const TABLE_HEAD = [
@@ -28,55 +31,22 @@ const TABLE_HEAD = [
   'Feedback',
 ]
 
-const TABLE_ROWS = [
-  {
-    id: 1,
-    startDate: '2024-05-20',
-    endDate: '2024-05-21',
-    interviewType: 'Technical',
-    interviewStatus: 'Completed',
-    interviewFeedback: undefined,
-    // {
-    //   id: 1,
-    //   feedback: "Good performance"
-    // },
-    talent: {
-      id: 1,
-      name: 'Alice',
-      surname: 'Smith',
-      email: 'alice.smith@example.com',
-      phoneNumber: '123-456-7890',
-      specialization: {
-        id: 1,
-        name: 'Software Development',
-      },
-      status: 'Active',
-      dateApplied: '2024-04-15',
-    },
-    interviewers: [
-      {
-        id: 1,
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        position: 'Senior Software Engineer',
-      },
-      {
-        id: 2,
-        firstName: 'Jane',
-        lastName: 'Doe',
-        email: 'jane.doe@example.com',
-        position: 'Software Developer',
-      },
-    ],
-  },
-]
-
 const dateFormat = 'YYYY-MM-DD HH:mm:ss'
 
 const Interviews: React.FC = () => {
   const [addFeedbackModalOpen, setAddFeedbackModalOpen] = useState(false)
   const [editFeedbackModalOpen, setEditFeedbackModalOpen] = useState(false)
+
+  const dispatch = useAppDispatch()
+  const interviews: Interview[] | undefined = useAppSelector(
+    (state: RootState) => state.interview.interviews,
+  )
+
+  useEffect(() => {
+    if (interviews === undefined) {
+      dispatch(getAllInterviews())
+    }
+  }, [interviews])
 
   return (
     <>
@@ -122,7 +92,7 @@ const Interviews: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {TABLE_ROWS.map(
+              {interviews?.map(
                 (
                   {
                     talent,
@@ -135,7 +105,7 @@ const Interviews: React.FC = () => {
                   },
                   index,
                 ) => {
-                  const isLast = index === TABLE_ROWS.length - 1
+                  const isLast = index === interviews.length - 1
                   const classes = isLast
                     ? 'p-4'
                     : 'p-4 border-b border-blue-gray-50'
@@ -185,7 +155,7 @@ const Interviews: React.FC = () => {
                             color="blue-gray"
                             className="font-normal"
                           >
-                            {talent.specialization.name}
+                            {talent.specialization.specializationName}
                           </Typography>
                         </div>
                       </td>
@@ -223,7 +193,11 @@ const Interviews: React.FC = () => {
                             color="blue-gray"
                             className="font-normal"
                           >
-                            {dayjs(startDate).format(dateFormat)}
+                            {startDate ? (
+                              dayjs(startDate).format(dateFormat)
+                            ) : (
+                              <>No date chosen</>
+                            )}
                           </Typography>
                         </div>
                       </td>
@@ -234,7 +208,11 @@ const Interviews: React.FC = () => {
                             color="blue-gray"
                             className="font-normal"
                           >
-                            {dayjs(endDate).format(dateFormat)}
+                            {endDate ? (
+                              dayjs(endDate).format(dateFormat)
+                            ) : (
+                              <>No date chosen</>
+                            )}
                           </Typography>
                         </div>
                       </td>
@@ -248,7 +226,7 @@ const Interviews: React.FC = () => {
                                 color="blue-gray"
                                 className="font-normal"
                               >
-                                {interviewFeedback}
+                                {interviewFeedback.feedback}
                               </Typography>
                               <Tooltip content="Edit Feedback">
                                 <IconButton

@@ -9,9 +9,11 @@ import {
 } from '@material-tailwind/react'
 import {
   Talent,
+  TalentCreationRequest,
   getTalentCV,
   getTalentsPageable,
   talentStatusMap,
+  updateTalentStatus,
 } from '@redux/talentSlice'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useState } from 'react'
@@ -59,14 +61,10 @@ const ApplicationPage: React.FC = () => {
   }, [talents])
 
   useEffect(() => {
-    dispatch(getTalentsPageable({ size: 2, page: 0, sort: 'email,ASC' }))
+    dispatch(getTalentsPageable({ size: 10, page: 0, sort: 'email,ASC' }))
   }, [sortCol])
 
   const [modalOpen, setModalOpen] = useState(false)
-
-  const handleCloseModal = () => {
-    setModalOpen(false)
-  }
 
   const [url, setUrl] = useState('')
 
@@ -84,6 +82,30 @@ const ApplicationPage: React.FC = () => {
   const handleInviteToInterviewButtonClick = (talent: Talent) => {
     setInviteToInterview(true)
     setTalentToInvite(talent)
+  }
+
+  const [showRejectModal, setShowRejectModal] = useState(false)
+  const [talentToReject, setTalentToReject] = useState<Talent>()
+
+  const handleRejectButtonClick = (talent: Talent) => {
+    setShowRejectModal(true)
+    setTalentToReject(talent)
+  }
+
+  const handleRejectTalent = () => {
+    const id = talentToReject!.id
+    const request: TalentCreationRequest = {
+      name: talentToReject!.name,
+      surname: talentToReject!.surname,
+      email: talentToReject!.email,
+      phoneNumber: talentToReject!.phoneNumber,
+      specializationId: talentToReject!.specialization.id!,
+      status: 'REJECTED',
+    }
+    dispatch(updateTalentStatus({ id, request })).then(() =>
+      setShowRejectModal(false),
+    )
+    // .then(dispatch(getInterviewers()))
   }
 
   return (
@@ -222,35 +244,38 @@ const ApplicationPage: React.FC = () => {
                       </Typography>
                     </td>
                     <td className={classes}>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal"
-                        placeholder={undefined}
-                      >
-                        <div className="flex gap-2 mb-2">
-                          <Button
-                            variant="filled"
-                            color="green"
-                            size="sm"
-                            placeholder={undefined}
-                            onClick={() =>
-                              handleInviteToInterviewButtonClick(talents[index])
-                            }
-                          >
-                            Invite to interview
-                          </Button>
-                          <Button
-                            variant="filled"
-                            size="sm"
-                            color="red"
-                            placeholder={undefined}
-                            // onClick={() => handleInviteToInterviewButtonClick(talents[index])}
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      </Typography>
+                      <div className="flex gap-2 mb-2">
+                        {status != 'REJECTED' ? (
+                          <>
+                            <Button
+                              variant="filled"
+                              color="green"
+                              size="sm"
+                              placeholder={undefined}
+                              onClick={() =>
+                                handleInviteToInterviewButtonClick(
+                                  talents[index],
+                                )
+                              }
+                            >
+                              Invite to interview
+                            </Button>
+                            <Button
+                              variant="filled"
+                              size="sm"
+                              color="red"
+                              placeholder={undefined}
+                              onClick={() =>
+                                handleRejectButtonClick(talents[index])
+                              }
+                            >
+                              Reject
+                            </Button>
+                          </>
+                        ) : (
+                          <>No applicable actions</>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )
@@ -262,7 +287,7 @@ const ApplicationPage: React.FC = () => {
       {modalOpen && (
         <Modal
           title="Applicant CV"
-          submitButtonAction={handleCloseModal}
+          submitButtonAction={() => setModalOpen(false)}
           size="xl"
           submitButtonLabel="OK"
         >
@@ -278,6 +303,19 @@ const ApplicationPage: React.FC = () => {
           isEdit={false}
           talent={talentToInvite!}
         />
+      )}
+      {showRejectModal && (
+        <Modal
+          title="Reject Applicant"
+          size="xl"
+          submitButtonLabel="Cancel"
+          submitButtonAction={() => setShowRejectModal(false)}
+          cancelButtonLabel="Reject"
+          cancelButtonAction={() => handleRejectTalent()}
+        >
+          Are you sure you want to reject{' '}
+          {talentToReject?.name + ' ' + talentToReject?.surname}?
+        </Modal>
       )}
     </>
   )

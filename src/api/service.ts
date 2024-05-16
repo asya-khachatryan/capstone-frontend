@@ -93,6 +93,15 @@ class ApiService {
       .json<PageableResponse<Talent>>()
   }
 
+  updateTalentStatus(id: number, request: TalentCreationRequest) {
+    return ky
+      .put(`${this.server_domain_endpoint}/talent/status/${id}`, {
+        json: request,
+        credentials: 'include',
+      })
+      .json<Talent>()
+  }
+
   searchTalents(query: string, type: string) {
     return ky
       .get(
@@ -173,6 +182,12 @@ class ApiService {
     return ky
       .delete(`${this.server_domain_endpoint}/interviewer/${id}`)
       .json<boolean>()
+  }
+
+  getAllInterviewes() {
+    return ky
+      .get(`${this.server_domain_endpoint}/interview`)
+      .json<Interview[]>()
   }
 
   createInterview(interview: InterviewRequestDTO) {
