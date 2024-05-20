@@ -14,8 +14,17 @@ export function Login() {
 
   const handleLogin = () => {
     dispatch(login({ username, password }))
-    navigate('/dashboard')
+      .then((result) => {
+        console.log(result)
+        if (result) {
+          navigate('/dashboard')
+        }
+      })
+      .catch((error) => {
+        console.error('Login failed:', error)
+      })
   }
+
   return (
     <section className="m-8 flex gap-4">
       <div className="w-full lg:w-3/5 mt-24">
@@ -55,7 +64,6 @@ export function Login() {
               }}
               crossOrigin={undefined}
               onChange={(e) => setUsername(e.target.value)}
-              required
             />
             <Typography
               variant="small"
@@ -75,7 +83,6 @@ export function Login() {
               }}
               crossOrigin={undefined}
               onChange={(e) => setPassword(e.target.value)}
-              required
             />
           </div>
           <Button
@@ -101,8 +108,8 @@ export function Login() {
       </div>
       <div className="w-2/5 h-full hidden lg:block">
         <img
-          src="public/road.jpg"
-          className="h-96 w-full object-cover rounded-3xl"
+          src="public/banner.png"
+          className="h-full w-full object-cover rounded-3xl"
         />
       </div>
     </section>

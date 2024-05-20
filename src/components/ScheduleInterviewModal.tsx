@@ -10,7 +10,11 @@ import {
   Select,
   Typography,
 } from '@material-tailwind/react'
-import { InterviewRequestDTO, createInterview } from '@redux/interviewSlice'
+import {
+  InterviewRequestDTO,
+  createInterview,
+  getInterviewTypes,
+} from '@redux/interviewSlice'
 import { Interviewer, getInterviewers } from '@redux/interviewerSlice'
 import { Talent } from '@redux/talentSlice'
 import React, { useEffect, useState } from 'react'
@@ -38,11 +42,16 @@ const ScheduleInterviewModal: React.FC<ModalProps> = ({
   )
 
   const [interviewerIds, setInterviewerIds] = useState<number[]>([])
-  const [interviewType, setInterviewType] = useState<string>('')
+  const [interviewType, setInterviewType] = useState('')
   const [talentID, setTalentID] = useState<number>(talent.id)
   const [selectedInterviewerId, setSelectedInterviewerId] = useState<number>(0)
+
   const interviewers: Interviewer[] | undefined = useAppSelector(
-    (state: RootState) => state.interviewer.interviewers,
+    (state: RootState) => state.interviewer.interviewersPageable?.content,
+  )
+
+  const interviewTypes: string[] | undefined = useAppSelector(
+    (state: RootState) => state.interview.interviewTypes,
   )
 
   useEffect(() => {
@@ -50,6 +59,12 @@ const ScheduleInterviewModal: React.FC<ModalProps> = ({
       dispatch(getInterviewers({ size: 2, page: 0, sort: 'email,ASC' }))
     }
   }, [interviewers])
+
+  useEffect(() => {
+    if (interviewTypes === undefined) {
+      dispatch(getInterviewTypes())
+    }
+  }, [interviewTypes])
 
   const handleOpen = (value: any) => (size = value)
 
@@ -118,14 +133,25 @@ const ScheduleInterviewModal: React.FC<ModalProps> = ({
               >
                 Interview type
               </Typography>
-              <Input
-                size="lg"
-                labelProps={{
-                  className: 'hidden',
-                }}
-                className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
-                onChange={(e) => setInterviewType(e.target.value)}
-              />
+              <Select
+                color="blue"
+                variant="outlined"
+                value=""
+                // label="position"
+                onChange={(e) => setInterviewType(e!)}
+                placeholder={undefined}
+              >
+                {interviewTypes === undefined ||
+                interviewTypes?.length === 0 ? (
+                  <Option disabled>No interview types available</Option>
+                ) : (
+                  interviewTypes.map((item) => (
+                    <Option key={item.toString()} value={item.toString()}>
+                      {item}
+                    </Option>
+                  ))
+                )}
+              </Select>
             </div>
           </div>
           <div className="mb-6 flex flex-col items-end gap-4 md:flex-row">
@@ -141,14 +167,11 @@ const ScheduleInterviewModal: React.FC<ModalProps> = ({
                 color="blue"
                 variant="outlined"
                 value=""
-                // label="position"
                 onChange={(e) => interviewerIds.push(Number(e))}
                 placeholder={undefined}
               >
-                {interviewers === undefined ? (
-                  <Option disabled>
-                    No positions are available at this time
-                  </Option>
+                {interviewers === undefined || interviewers.length === 0 ? (
+                  <Option disabled>No interviewers added</Option>
                 ) : (
                   interviewers?.map((item) => (
                     <Option
@@ -161,9 +184,10 @@ const ScheduleInterviewModal: React.FC<ModalProps> = ({
                 )}
               </Select>
               {/* <Select
+                className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
                 isSearchable
-                value={selectedInterviewer}
-                onChange={onInterviewerSelect}
+                value={interviewerIds}
+                onChange={(e: any) => interviewerIds.push(Number(e))}
                 options={interviewers?.map(interviewer => ({
                   value: interviewer.id,
                   label: `${interviewer.firstName} ${interviewer.lastName}`

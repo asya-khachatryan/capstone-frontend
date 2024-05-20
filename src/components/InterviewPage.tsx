@@ -20,13 +20,14 @@ import {
 import { useEffect, useState } from 'react'
 import { RootState } from '../store'
 import Modal from './Modal'
+import ScheduleInterviewModal from './ScheduleInterviewModal'
 
-const InterviewTabContent: React.FC = () => {
+const InterviewPage: React.FC = () => {
   const TABLE_HEAD = [
     'Talent',
     'Specialization',
     'Interviewer list',
-    'Status',
+    'Actions',
     'Next Step',
   ]
 
@@ -72,6 +73,31 @@ const InterviewTabContent: React.FC = () => {
       phoneNumber: talentToReject!.phoneNumber,
       specializationId: talentToReject!.specialization.id!,
       status: 'REJECTED',
+    }
+    dispatch(updateTalentStatus({ id, request })).then(() =>
+      setShowRejectModal(false),
+    )
+    // .then(dispatch(getInterviewers()))
+  }
+  const [showNextStepModal, setShowNextStepModal] = useState(false)
+  const [talentNextStep, setTalentNextStep] = useState<Talent>()
+
+  const handleNextSteptButtonClick = (talent: Talent) => {
+    setShowNextStepModal(true)
+    setTalentNextStep(talent)
+  }
+
+  const [inviteToInterview, setInviteToInterview] = useState(false)
+
+  const handleHireTalent = () => {
+    const id = talentNextStep!.id
+    const request: TalentCreationRequest = {
+      name: talentNextStep!.name,
+      surname: talentNextStep!.surname,
+      email: talentNextStep!.email,
+      phoneNumber: talentNextStep!.phoneNumber,
+      specializationId: talentNextStep!.specialization.id!,
+      status: 'HIRED',
     }
     dispatch(updateTalentStatus({ id, request })).then(() =>
       setShowRejectModal(false),
@@ -125,7 +151,7 @@ const InterviewTabContent: React.FC = () => {
                   : 'p-4 border-b border-blue-gray-50'
 
                 return (
-                  <tr key={name + ' ' + surname}>
+                  <tr key={id}>
                     <td className={classes}>
                       <div className="flex items-center gap-3">
                         <Avatar
@@ -215,7 +241,13 @@ const InterviewTabContent: React.FC = () => {
                     </td>
                     <td className={classes}>
                       <Tooltip content="Edit User">
-                        <IconButton variant="text" placeholder={undefined}>
+                        <IconButton
+                          variant="text"
+                          placeholder={undefined}
+                          onClick={() =>
+                            handleNextSteptButtonClick(interviewwes[index])
+                          }
+                        >
                           <PencilIcon className="h-4 w-4" />
                         </IconButton>
                       </Tooltip>
@@ -252,8 +284,46 @@ const InterviewTabContent: React.FC = () => {
           {talentToReject?.name + ' ' + talentToReject?.surname}?
         </Modal>
       )}
+      {showNextStepModal && (
+        <Modal
+          title="Next step"
+          size="md"
+          submitButtonLabel="OK"
+          submitButtonAction={() => setShowNextStepModal(false)}
+        >
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Button
+              variant="outlined"
+              size="sm"
+              color="green"
+              placeholder={undefined}
+              onClick={() => setInviteToInterview(true)}
+            >
+              Invite to another interview
+            </Button>
+
+            <Button
+              variant="filled"
+              size="sm"
+              color="green"
+              placeholder={undefined}
+              onClick={() => handleHireTalent()}
+            >
+              Change status to hired
+            </Button>
+          </div>
+        </Modal>
+      )}
+      {inviteToInterview && (
+        <ScheduleInterviewModal
+          closeModal={() => setInviteToInterview(false)}
+          size="lg"
+          isEdit={false}
+          talent={talentNextStep!}
+        />
+      )}
     </>
   )
 }
 
-export default InterviewTabContent
+export default InterviewPage

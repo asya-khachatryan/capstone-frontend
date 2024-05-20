@@ -4,7 +4,6 @@ import Dashboard from '@components/Dashboard'
 import Interviewers from '@components/Interviewers'
 import Interviews from '@components/Interviews'
 import { Login } from '@components/Login'
-import MentorAssignmentModal from '@components/MentorAssignmentModal'
 import Profile from '@components/Profile'
 import Register from '@components/Register'
 import SpecializationPage from '@components/SpecializationPage'
@@ -33,15 +32,6 @@ const App: React.FC = () => {
           <Route path="*" element={<NotFoundPage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/apply" element={<ApplicationForm />} />
-          <Route
-            path="/test"
-            element={
-              <MentorAssignmentModal
-                closeModal={() => console.log()}
-                size="lg"
-              ></MentorAssignmentModal>
-            }
-          />
         </Routes>
       </HistoryRouter>
     </ReduxStoreProvider>
@@ -52,7 +42,6 @@ function ProtectedRoute() {
   const isAuthenticated: boolean = useAppSelector(
     (state: RootState) => state.auth.isAuthenticated,
   )
-  console.log(isAuthenticated)
   return isAuthenticated ? <Dashboard /> : <Navigate to="/login" />
 }
 

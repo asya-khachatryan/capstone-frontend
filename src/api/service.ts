@@ -1,11 +1,7 @@
-import { Credentials, UserDTO, UserProfileDTO } from '@redux/authSlice'
-import {
-  Interview,
-  InterviewFeedback,
-  InterviewRequestDTO,
-} from '@redux/interviewSlice'
+import { Credentials, User, UserProfile } from '@redux/authSlice'
+import { Interview, InterviewRequestDTO } from '@redux/interviewSlice'
 import { Interviewer } from '@redux/interviewerSlice'
-import { MenteeDto, MentorDto } from '@redux/onboardingSlice'
+import { Mentee } from '@redux/onboardingSlice'
 import { Specialization } from '@redux/specializationSlice'
 import { Talent, TalentCreationRequest } from '@redux/talentSlice'
 import ky from 'ky'
@@ -14,7 +10,7 @@ import { PageableRequest, PageableResponse } from 'services/types'
 class ApiService {
   server_domain_endpoint = import.meta.env.VITE_SERVER_DOMAIN_ENDPOINT
 
-  register(userDTO: UserDTO) {
+  register(userDTO: User) {
     return ky.post(`${this.server_domain_endpoint}/user/register`, {
       json: {
         firstName: userDTO.firstName,
@@ -48,21 +44,29 @@ class ApiService {
       .get(`${this.server_domain_endpoint}/user/me`, {
         credentials: 'include',
       })
-      .json<UserProfileDTO>()
+      .json<UserProfile>()
   }
 
-  updateUser(userDTO: UserDTO) {
+  updateUser(userDTO: User) {
     return ky
       .put(`${this.server_domain_endpoint}/user/${userDTO.username}`, {
         json: userDTO,
       })
-      .json<UserDTO>()
+      .json<User>()
   }
 
-  getSpecializations() {
+  getAllSpecializations() {
     return ky
       .get(`${this.server_domain_endpoint}/specialization`)
       .json<Specialization[]>()
+  }
+
+  getSpecializations(request: PageableRequest) {
+    return ky
+      .get(
+        `${this.server_domain_endpoint}/specialization/page?size=${request.size}&page=${request.page}&sort=${request.sort !== null ? request.sort : ''}`,
+      )
+      .json<PageableResponse<Specialization>>()
   }
 
   createSpecialization(specialization: Specialization) {
@@ -88,7 +92,7 @@ class ApiService {
   getTalentsPageable(request: PageableRequest) {
     return ky
       .get(
-        `${this.server_domain_endpoint}/talent/page?size=${request.size}&page=${request.page}&sort=${request.sort}`,
+        `${this.server_domain_endpoint}/talent/page?size=${request.size}&page=${request.page}&sort=${request.sort !== null ? request.sort : ''}`,
       )
       .json<PageableResponse<Talent>>()
   }
@@ -116,12 +120,18 @@ class ApiService {
       .json<Talent[]>()
   }
 
-  getMentees() {
-    return ky.get(`${this.server_domain_endpoint}/mentee`).json<MenteeDto[]>()
+  getMentees(request: PageableRequest) {
+    return ky
+      .get(
+        `${this.server_domain_endpoint}/mentee?size=${request.size}&page=${request.page}&sort=${request.sort !== null ? request.sort : ''}`,
+      )
+      .json<PageableResponse<Mentee>>()
   }
 
-  getMentors() {
-    return ky.get(`${this.server_domain_endpoint}/mentor`).json<MentorDto[]>()
+  searchMentees(query: string) {
+    return ky
+      .get(`${this.server_domain_endpoint}/mentee/search?query=${query}`)
+      .json<Mentee[]>()
   }
 
   createTalent(talent: TalentCreationRequest) {
@@ -157,7 +167,7 @@ class ApiService {
   getInterviewers(request: PageableRequest) {
     return ky
       .get(
-        `${this.server_domain_endpoint}/interviewer?size=${request.size}&page=${request.page}&sort=${request.sort}`,
+        `${this.server_domain_endpoint}/interviewer?size=${request.size}&page=${request.page}&sort=${request.sort !== null ? request.sort : ''}`,
       )
       .json<PageableResponse<Interviewer>>()
   }
@@ -200,15 +210,19 @@ class ApiService {
       .json<Interview>()
   }
 
-  submitFeedback(feedback: InterviewFeedback, interviewID: number) {
+  submitFeedback(interviewID: number, feedback: string) {
     return ky
-      .post(
-        `${this.server_domain_endpoint}/feedback?interviewID=${interviewID}`,
-        {
-          json: feedback,
-        },
-      )
-      .json<InterviewFeedback>()
+      .put(`${this.server_domain_endpoint}/interview/${interviewID}/feedback`, {
+        body: feedback,
+        credentials: 'include',
+      })
+      .json<Interview>()
+  }
+
+  getInterviewTypes() {
+    return ky
+      .get(`${this.server_domain_endpoint}/interview/types`)
+      .json<string[]>()
   }
 }
 

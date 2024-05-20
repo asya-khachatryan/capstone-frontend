@@ -12,14 +12,14 @@ export interface Interviewer {
 
 interface InterviewersState {
   isLoading: boolean
-  interviewers?: Interviewer[]
   interviewersPageable?: PageableResponse<Interviewer>
+  interviewerPageableRequest: PageableRequest
 }
 
 const initialState: InterviewersState = {
   isLoading: false,
-  interviewers: undefined,
   interviewersPageable: undefined,
+  interviewerPageableRequest: { size: 5, page: 0, sort: null },
 }
 
 export const createInterviewer = createAsyncThunk(
@@ -60,11 +60,11 @@ const interviewerSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getInterviewers.pending, (state) => {
+      .addCase(getInterviewers.pending, (state, action) => {
         state.isLoading = true
+        state.interviewerPageableRequest = action.meta.arg
       })
       .addCase(getInterviewers.fulfilled, (state, action) => {
-        state.interviewers = action.payload.content
         state.interviewersPageable = action.payload
       })
       .addCase(getInterviewers.rejected, (state, action) => {})

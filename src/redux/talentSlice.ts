@@ -38,6 +38,7 @@ interface TalentState {
   talents?: Talent[]
   talentsPageable?: PageableResponse<Talent>
   interviewees?: Talent[]
+  talentsPageableRequest: PageableRequest
 }
 
 const initialState: TalentState = {
@@ -45,6 +46,7 @@ const initialState: TalentState = {
   talents: undefined,
   talentsPageable: undefined,
   interviewees: undefined,
+  talentsPageableRequest: { size: 10, page: 0, sort: null },
 }
 
 export const submitApplication = createAsyncThunk(
@@ -70,9 +72,8 @@ export const getTalents = createAsyncThunk('talents', async () => {
 
 export const getTalentsPageable = createAsyncThunk(
   'talentsPageable',
-  async (request: PageableRequest, thunkApi) => {
+  async (request: PageableRequest) => {
     const response = await apiService.getTalentsPageable(request)
-    // response.nextPage = (pageidx: number) => thunkApi.dispatch(getTalentsPageable(Object.assign({}, request, { page: pageidx })))
     return response
   },
 )
@@ -127,8 +128,9 @@ const talentsSlice = createSlice({
         state.talents = action.payload
       })
       .addCase(getTalents.rejected, (state, action) => {})
-      .addCase(getTalentsPageable.pending, (state) => {
+      .addCase(getTalentsPageable.pending, (state, action) => {
         state.isLoading = true
+        state.talentsPageableRequest = action.meta.arg
       })
       .addCase(getTalentsPageable.fulfilled, (state, action) => {
         state.talents = action.payload.content

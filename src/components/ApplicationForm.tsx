@@ -13,7 +13,11 @@ import {
   TabsBody,
   Typography,
 } from '@material-tailwind/react'
-import { Specialization, getSpecializations } from '@redux/specializationSlice'
+import {
+  Specialization,
+  getAllSpecializations,
+  getSpecializations,
+} from '@redux/specializationSlice'
 import { TalentCreationRequest, submitApplication } from '@redux/talentSlice'
 import React, { useEffect, useState } from 'react'
 import { RootState } from '../store'
@@ -23,12 +27,12 @@ const ApplicationForm: React.FC = () => {
   const dispatch = useAppDispatch()
 
   const specializations: Specialization[] | undefined = useAppSelector(
-    (state: RootState) => state.specialization.specializations,
+    (state: RootState) => state.specialization.allSpecializations,
   )
 
   useEffect(() => {
     if (specializations === undefined) {
-      dispatch(getSpecializations())
+      dispatch(getAllSpecializations())
     }
   }, [specializations])
 
@@ -208,7 +212,8 @@ const ApplicationForm: React.FC = () => {
                         placeholder={undefined}
                         error={submitTried && specializationId === 0}
                       >
-                        {specializations === undefined ? (
+                        {specializations === undefined ||
+                        specializations.length === 0 ? (
                           <Option disabled>
                             No positions are available at this time
                           </Option>
@@ -248,6 +253,7 @@ const ApplicationForm: React.FC = () => {
                           className: 'before:content-none after:content-none',
                         }}
                         crossOrigin={undefined}
+                        value={undefined}
                       />
                     </div>
                     <Button size="lg" type="submit" placeholder={undefined}>

@@ -1,9 +1,10 @@
-import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
   Avatar,
   Button,
   CardBody,
+  CardFooter,
   Chip,
   Typography,
 } from '@material-tailwind/react'
@@ -17,26 +18,38 @@ import {
 } from '@redux/talentSlice'
 import dayjs from 'dayjs'
 import { useCallback, useEffect, useState } from 'react'
+import {
+  PageableRequest,
+  PageableResponse,
+  SortCol,
+  sortColToString,
+  stringToSortCol,
+} from '@services/types'
 import { RootState } from '../store'
 import Modal from './Modal'
 import ScheduleInterviewModal from './ScheduleInterviewModal'
 
-type SortCol = {
-  name: string
-  directionAsc: boolean
-}
-
 const ApplicationPage: React.FC = () => {
-  const TABLE_HEAD = [
-    'Talent',
-    'Specialization',
-    'Status',
-    'Date Applied',
-    'CV',
-    'Actions',
-  ]
+  const TABLE_HEAD = new Map<string, string>([
+    ['name', 'Talent'],
+    ['specialization_id', 'Specialization'],
+    ['talentStatus', 'Status'],
+    ['dateApplied', 'Date Applied'],
+    ['_cv', 'CV'],
+    ['_actions', 'Actions'],
+  ])
 
-  const [sortCol, setSortCol] = useState<SortCol | null>(null)
+  const talentsPageableRequest: PageableRequest | undefined = useAppSelector(
+    (state: RootState) => state.talent.talentsPageableRequest,
+  )
+
+  const talentsPage: PageableResponse<Talent> | undefined = useAppSelector(
+    (state: RootState) => state.talent.talentsPageable,
+  )
+
+  const [sortCol, setSortCol] = useState<SortCol | null>(
+    stringToSortCol(talentsPageableRequest?.sort ?? null),
+  )
 
   const selectSortCol = useCallback(
     (colName: string) => {
@@ -54,15 +67,17 @@ const ApplicationPage: React.FC = () => {
     (state: RootState) => state.talent.talents,
   )
 
-  useEffect(() => {
-    if (talents === undefined) {
-      dispatch(getTalentsPageable({ size: 10, page: 0, sort: 'email,ASC' }))
-    }
-  }, [talents])
+  const [page, setPage] = useState(talentsPageableRequest.page)
 
   useEffect(() => {
-    dispatch(getTalentsPageable({ size: 10, page: 0, sort: 'email,ASC' }))
-  }, [sortCol])
+    dispatch(
+      getTalentsPageable({
+        size: talentsPageableRequest.size,
+        page: page,
+        sort: sortColToString(sortCol),
+      }),
+    )
+  }, [sortCol, page])
 
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -92,7 +107,7 @@ const ApplicationPage: React.FC = () => {
     setTalentToReject(talent)
   }
 
-  const handleRejectTalent = () => {
+  const handleRejectTalent = useCallback(() => {
     const id = talentToReject!.id
     const request: TalentCreationRequest = {
       name: talentToReject!.name,
@@ -106,7 +121,7 @@ const ApplicationPage: React.FC = () => {
       setShowRejectModal(false),
     )
     // .then(dispatch(getInterviewers()))
-  }
+  }, [talentToReject, updateTalentStatus])
 
   return (
     <>
@@ -114,24 +129,35 @@ const ApplicationPage: React.FC = () => {
         <table className="mt-4 w-full min-w-max table-auto text-left">
           <thead>
             <tr>
-              {TABLE_HEAD.map((head, index) => (
-                <th
-                  key={head}
-                  className="cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50/50 p-4 transition-colors hover:bg-blue-gray-50"
-                >
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
-                    placeholder={undefined}
+              {Array.from(TABLE_HEAD).map(([key, value]) => {
+                let isSortable = !key.startsWith('_')
+                let ascSort =
+                  sortCol != null &&
+                  key === sortCol.name &&
+                  sortCol.directionAsc
+                return (
+                  <th
+                    key={key}
+                    className="cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50/50 p-4 transition-colors hover:bg-blue-gray-50"
+                    onClick={isSortable ? () => selectSortCol(key) : undefined}
                   >
-                    {head}{' '}
-                    {index !== TABLE_HEAD.length - 1 && (
-                      <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                    )}
-                  </Typography>
-                </th>
-              ))}
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                      placeholder={undefined}
+                    >
+                      {value}{' '}
+                      {isSortable && ascSort && (
+                        <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
+                      )}
+                      {isSortable && !ascSort && (
+                        <ChevronDownIcon strokeWidth={2} className="h-4 w-4" />
+                      )}
+                    </Typography>
+                  </th>
+                )
+              })}
             </tr>
           </thead>
           <tbody>
@@ -245,7 +271,7 @@ const ApplicationPage: React.FC = () => {
                     </td>
                     <td className={classes}>
                       <div className="flex gap-2 mb-2">
-                        {status != 'REJECTED' ? (
+                        {status !== 'REJECTED' ? (
                           <>
                             <Button
                               variant="filled"
@@ -284,6 +310,42 @@ const ApplicationPage: React.FC = () => {
           </tbody>
         </table>
       </CardBody>
+      <CardFooter
+        className="flex items-center justify-between border-t border-blue-gray-50 p-4"
+        placeholder={undefined}
+      >
+        <Typography
+          variant="small"
+          color="blue-gray"
+          className="font-normal"
+          placeholder={undefined}
+        >
+          Page {(talentsPage?.number ?? 0) + 1} of {talentsPage?.totalPages}
+        </Typography>
+        <div className="flex gap-2">
+          {!talentsPage?.first && (
+            <Button
+              onClick={() => setPage(page - 1)}
+              variant="outlined"
+              size="sm"
+              placeholder={undefined}
+            >
+              Previous
+            </Button>
+          )}
+
+          {!talentsPage?.last && (
+            <Button
+              onClick={() => setPage(page + 1)}
+              variant="outlined"
+              size="sm"
+              placeholder={undefined}
+            >
+              Next
+            </Button>
+          )}
+        </div>
+      </CardFooter>
       {modalOpen && (
         <Modal
           title="Applicant CV"

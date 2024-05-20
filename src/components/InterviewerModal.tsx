@@ -98,7 +98,16 @@ const InterviewerModal: React.FC<ModalProps> = ({
         handler={handleOpen}
         placeholder={undefined}
       >
-        <DialogHeader placeholder={undefined}>Add an interviewer</DialogHeader>
+        {isEdit ? (
+          <DialogHeader placeholder={undefined}>
+            Edit an interviewer
+          </DialogHeader>
+        ) : (
+          <DialogHeader placeholder={undefined}>
+            Add an interviewer
+          </DialogHeader>
+        )}
+
         <DialogBody placeholder={undefined}>
           <div className="mb-6 flex flex-col items-end gap-4 md:flex-row">
             <div className="w-full">

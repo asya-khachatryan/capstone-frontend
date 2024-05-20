@@ -1,6 +1,10 @@
 import NavigationBar from '@components/Navbar'
-import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
-import { PencilIcon, UserPlusIcon } from '@heroicons/react/24/solid'
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  PencilIcon,
+  UserPlusIcon,
+} from '@heroicons/react/24/solid'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
   Button,
@@ -14,28 +18,68 @@ import {
   Typography,
 } from '@material-tailwind/react'
 import { Specialization, getSpecializations } from '@redux/specializationSlice'
-import { useEffect, useState } from 'react'
+import {
+  PageableRequest,
+  PageableResponse,
+  SortCol,
+  sortColToString,
+  stringToSortCol,
+} from '@services/types'
+import { useCallback, useEffect, useState } from 'react'
 import { RootState } from 'store'
 import SpecializationModal from './SpecializationModal'
 
-const TABLE_HEAD = ['Specialization', 'Status', 'Actions']
+const TABLE_HEAD = new Map<string, string>([
+  ['specializationName', 'Specialization'],
+  ['active', 'Status'],
+  ['_actions', 'Actions'],
+])
 
 const SpecializationPage: React.FC = () => {
+  const dispatch = useAppDispatch()
+
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
   const [specializationToUpdate, setSpecializationToUpdate] =
     useState<Specialization>()
 
-  const specializations: Specialization[] | undefined = useAppSelector(
-    (state: RootState) => state.specialization.specializations,
+  const specPage: PageableResponse<Specialization> | undefined = useAppSelector(
+    (state: RootState) => state.specialization.specPageable,
   )
-  const dispatch = useAppDispatch()
+  const specPageableRequest: PageableRequest | undefined = useAppSelector(
+    (state: RootState) => state.specialization.specPageableRequest,
+  )
+
+  const [sortCol, setSortCol] = useState<SortCol | null>(
+    stringToSortCol(specPageableRequest?.sort ?? null),
+  )
+
+  const selectSortCol = useCallback(
+    (colName: string) => {
+      if (sortCol?.name === colName) {
+        setSortCol({ name: colName, directionAsc: !sortCol.directionAsc })
+      } else {
+        setSortCol({ name: colName, directionAsc: true })
+      }
+    },
+    [sortCol, setSortCol],
+  )
+
+  const specializations: Specialization[] | undefined = useAppSelector(
+    (state: RootState) => state.specialization.specPageable?.content,
+  )
+
+  const [page, setPage] = useState(specPageableRequest.page)
 
   useEffect(() => {
-    if (specializations === undefined) {
-      dispatch(getSpecializations())
-    }
-  }, [specializations])
+    dispatch(
+      getSpecializations({
+        size: specPageableRequest.size,
+        page: page,
+        sort: sortColToString(sortCol),
+      }),
+    )
+  }, [sortCol, page])
 
   const handleUpdateSpecialization = (specialization: Specialization) => {
     setUpdateModalOpen(true)
@@ -73,26 +117,40 @@ const SpecializationPage: React.FC = () => {
           <table className="mt-4 w-full min-w-max table-auto text-left">
             <thead>
               <tr>
-                {TABLE_HEAD.map((head, index) => (
-                  <th
-                    key={head}
-                    className="cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50/50 p-4 transition-colors hover:bg-blue-gray-50"
-                  >
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                {Array.from(TABLE_HEAD).map(([key, value]) => {
+                  let isSortable = !key.startsWith('_')
+                  let ascSort =
+                    sortCol != null &&
+                    key === sortCol.name &&
+                    sortCol.directionAsc
+                  return (
+                    <th
+                      key={key}
+                      className="cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50/50 p-4 transition-colors hover:bg-blue-gray-50"
+                      onClick={
+                        isSortable ? () => selectSortCol(key) : undefined
+                      }
                     >
-                      {head}{' '}
-                      {index !== TABLE_HEAD.length - 1 && (
-                        <ChevronUpDownIcon
-                          strokeWidth={2}
-                          className="h-4 w-4"
-                        />
-                      )}
-                    </Typography>
-                  </th>
-                ))}
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                        placeholder={undefined}
+                      >
+                        {value}{' '}
+                        {isSortable && ascSort && (
+                          <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
+                        )}
+                        {isSortable && !ascSort && (
+                          <ChevronDownIcon
+                            strokeWidth={2}
+                            className="h-4 w-4"
+                          />
+                        )}
+                      </Typography>
+                    </th>
+                  )
+                })}
               </tr>
             </thead>
             <tbody>
@@ -147,17 +205,40 @@ const SpecializationPage: React.FC = () => {
             </tbody>
           </table>
         </CardBody>
-        <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-          <Typography variant="small" color="blue-gray" className="font-normal">
-            Page 1 of 10
+        <CardFooter
+          className="flex items-center justify-between border-t border-blue-gray-50 p-4"
+          placeholder={undefined}
+        >
+          <Typography
+            variant="small"
+            color="blue-gray"
+            className="font-normal"
+            placeholder={undefined}
+          >
+            Page {(specPage?.number ?? 0) + 1} of {specPage?.totalPages}
           </Typography>
           <div className="flex gap-2">
-            <Button variant="outlined" size="sm">
-              Previous
-            </Button>
-            <Button variant="outlined" size="sm">
-              Next
-            </Button>
+            {!specPage?.first && (
+              <Button
+                onClick={() => setPage(page - 1)}
+                variant="outlined"
+                size="sm"
+                placeholder={undefined}
+              >
+                Previous
+              </Button>
+            )}
+
+            {!specPage?.last && (
+              <Button
+                onClick={() => setPage(page + 1)}
+                variant="outlined"
+                size="sm"
+                placeholder={undefined}
+              >
+                Next
+              </Button>
+            )}
           </div>
         </CardFooter>
       </Card>

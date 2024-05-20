@@ -1,6 +1,11 @@
 import NavigationBar from '@components/Navbar'
-import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
-import { PencilIcon, TrashIcon, UserPlusIcon } from '@heroicons/react/24/solid'
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  PencilIcon,
+  TrashIcon,
+  UserPlusIcon,
+} from '@heroicons/react/24/solid'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
   Button,
@@ -17,12 +22,24 @@ import {
   deleteInterviewer,
   getInterviewers,
 } from '@redux/interviewerSlice'
-import { useEffect, useState } from 'react'
+import {
+  PageableRequest,
+  PageableResponse,
+  SortCol,
+  sortColToString,
+  stringToSortCol,
+} from '@services/types'
+import { useCallback, useEffect, useState } from 'react'
 import { RootState } from 'store'
 import InterviewerModal from './InterviewerModal'
 import Modal from './Modal'
 
-const TABLE_HEAD = ['Interviewer', 'Email', 'Position', 'Actions']
+const TABLE_HEAD = new Map<string, string>([
+  ['firstName', 'Interviewer'],
+  ['email', 'Email'],
+  ['position', 'Position'],
+  ['_actions', 'Actions'],
+])
 
 const Interviewers: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -31,16 +48,45 @@ const Interviewers: React.FC = () => {
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
   const [interviewerToUpdate, setInterviewerToUpdate] = useState<Interviewer>()
 
-  const interviewers: Interviewer[] | undefined = useAppSelector(
-    (state: RootState) => state.interviewer.interviewers,
-  )
   const dispatch = useAppDispatch()
 
+  const interviewerPage: PageableResponse<Interviewer> | undefined =
+    useAppSelector((state: RootState) => state.interviewer.interviewersPageable)
+  const interviewerPageableRequest: PageableRequest | undefined =
+    useAppSelector(
+      (state: RootState) => state.interviewer.interviewerPageableRequest,
+    )
+
+  const [sortCol, setSortCol] = useState<SortCol | null>(
+    stringToSortCol(interviewerPageableRequest?.sort ?? null),
+  )
+
+  const selectSortCol = useCallback(
+    (colName: string) => {
+      if (sortCol?.name === colName) {
+        setSortCol({ name: colName, directionAsc: !sortCol.directionAsc })
+      } else {
+        setSortCol({ name: colName, directionAsc: true })
+      }
+    },
+    [sortCol, setSortCol],
+  )
+
+  const interviewers: Interviewer[] | undefined = useAppSelector(
+    (state: RootState) => state.interviewer.interviewersPageable?.content,
+  )
+
+  const [page, setPage] = useState(interviewerPageableRequest.page)
+
   useEffect(() => {
-    if (interviewers === undefined) {
-      dispatch(getInterviewers({ size: 2, page: 0, sort: 'email,ASC' }))
-    }
-  }, [interviewers])
+    dispatch(
+      getInterviewers({
+        size: interviewerPageableRequest.size,
+        page: page,
+        sort: sortColToString(sortCol),
+      }),
+    )
+  }, [sortCol, page])
 
   const handleDeleteButtonClick = (interviewer: Interviewer) => {
     setShowDeleteModal(true)
@@ -48,10 +94,9 @@ const Interviewers: React.FC = () => {
   }
 
   const handleDeleteInterviewer = () => {
-    dispatch(deleteInterviewer(interviewerToDelete?.id!)).then(() =>
-      setShowDeleteModal(false),
-    )
-    // .then(dispatch(getInterviewers()))
+    dispatch(deleteInterviewer(interviewerToDelete?.id!))
+      .then(() => setShowDeleteModal(false))
+      .then(() => dispatch(getInterviewers(interviewerPageableRequest)))
   }
 
   const handleUpdateInterviewer = (interviewer: Interviewer) => {
@@ -90,38 +135,52 @@ const Interviewers: React.FC = () => {
           <table className="mt-4 w-full min-w-max table-auto text-left">
             <thead>
               <tr>
-                {TABLE_HEAD.map((head, index) => (
-                  <th
-                    key={head}
-                    className="cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50/50 p-4 transition-colors hover:bg-blue-gray-50"
-                  >
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                {Array.from(TABLE_HEAD).map(([key, value]) => {
+                  let isSortable = !key.startsWith('_')
+                  let ascSort =
+                    sortCol != null &&
+                    key === sortCol.name &&
+                    sortCol.directionAsc
+                  return (
+                    <th
+                      key={key}
+                      className="cursor-pointer border-y border-blue-gray-100 bg-blue-gray-50/50 p-4 transition-colors hover:bg-blue-gray-50"
+                      onClick={
+                        isSortable ? () => selectSortCol(key) : undefined
+                      }
                     >
-                      {head}{' '}
-                      {index !== TABLE_HEAD.length - 1 && (
-                        <ChevronUpDownIcon
-                          strokeWidth={2}
-                          className="h-4 w-4"
-                        />
-                      )}
-                    </Typography>
-                  </th>
-                ))}
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
+                        placeholder={undefined}
+                      >
+                        {value}{' '}
+                        {isSortable && ascSort && (
+                          <ChevronUpIcon strokeWidth={2} className="h-4 w-4" />
+                        )}
+                        {isSortable && !ascSort && (
+                          <ChevronDownIcon
+                            strokeWidth={2}
+                            className="h-4 w-4"
+                          />
+                        )}
+                      </Typography>
+                    </th>
+                  )
+                })}
               </tr>
             </thead>
             <tbody>
               {interviewers?.map(
-                ({ firstName, lastName, email, position }, index) => {
+                ({ id, firstName, lastName, email, position }, index) => {
                   const isLast = index === interviewers.length - 1
                   const classes = isLast
                     ? 'p-4'
                     : 'p-4 border-b border-blue-gray-50'
 
                   return (
-                    <tr key={name}>
+                    <tr key={id}>
                       <td className={classes}>
                         <div className="flex items-center gap-3">
                           <div className="flex flex-col">
@@ -186,17 +245,41 @@ const Interviewers: React.FC = () => {
             </tbody>
           </table>
         </CardBody>
-        <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-          <Typography variant="small" color="blue-gray" className="font-normal">
-            Page 1 of 10
+        <CardFooter
+          className="flex items-center justify-between border-t border-blue-gray-50 p-4"
+          placeholder={undefined}
+        >
+          <Typography
+            variant="small"
+            color="blue-gray"
+            className="font-normal"
+            placeholder={undefined}
+          >
+            Page {(interviewerPage?.number ?? 0) + 1} of{' '}
+            {interviewerPage?.totalPages}
           </Typography>
           <div className="flex gap-2">
-            <Button variant="outlined" size="sm">
-              Previous
-            </Button>
-            <Button variant="outlined" size="sm">
-              Next
-            </Button>
+            {!interviewerPage?.first && (
+              <Button
+                onClick={() => setPage(page - 1)}
+                variant="outlined"
+                size="sm"
+                placeholder={undefined}
+              >
+                Previous
+              </Button>
+            )}
+
+            {!interviewerPage?.last && (
+              <Button
+                onClick={() => setPage(page + 1)}
+                variant="outlined"
+                size="sm"
+                placeholder={undefined}
+              >
+                Next
+              </Button>
+            )}
           </div>
         </CardFooter>
       </Card>

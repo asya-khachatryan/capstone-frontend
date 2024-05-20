@@ -10,7 +10,7 @@ export interface Interview {
   endDate?: string
   interviewType: string
   interviewStatus: string
-  interviewFeedback?: InterviewFeedback
+  interviewFeedback?: string
   talent: Talent
   interviewers: Interviewer[]
 }
@@ -21,21 +21,18 @@ export interface InterviewRequestDTO {
   talentID: number
 }
 
-export interface InterviewFeedback {
-  id?: number
-  feedback: string
-}
-
 interface InterviewsState {
   isLoading: boolean
   interviews?: Interview[]
   interviewsPageable?: PageableResponse<Interview>
+  interviewTypes?: string[]
 }
 
 const initialState: InterviewsState = {
   isLoading: false,
   interviews: undefined,
   interviewsPageable: undefined,
+  interviewTypes: undefined,
 }
 
 export const createInterview = createAsyncThunk(
@@ -59,6 +56,28 @@ export const getAllInterviews = createAsyncThunk(
   },
 )
 
+export const getInterviewTypes = createAsyncThunk(
+  'getInterviewTypes',
+  async () => {
+    const response = await apiService.getInterviewTypes()
+    return response
+  },
+)
+
+export const submitFeedback = createAsyncThunk(
+  'submitFeedback',
+  async ({
+    interviewId,
+    feedback,
+  }: {
+    interviewId: number
+    feedback: string
+  }) => {
+    const response = await apiService.submitFeedback(interviewId, feedback)
+    return response
+  },
+)
+
 const interviewSlice = createSlice({
   name: 'interviews',
   initialState,
@@ -70,10 +89,11 @@ const interviewSlice = createSlice({
       })
       .addCase(getAllInterviews.fulfilled, (state, action) => {
         state.interviews = action.payload
-        console.log('hey hey')
-        console.log(state.interviews)
       })
       .addCase(getAllInterviews.rejected, (state, action) => {})
+      .addCase(getInterviewTypes.fulfilled, (state, action) => {
+        state.interviewTypes = action.payload
+      })
   },
 })
 

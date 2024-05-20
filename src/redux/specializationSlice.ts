@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import apiService from '@api/service'
+import { PageableRequest, PageableResponse } from '@services/types'
 
 export interface Specialization {
   id?: number
@@ -9,18 +10,32 @@ export interface Specialization {
 
 interface SpecializationsState {
   isLoading: boolean
-  specializations?: Specialization[]
+  specPageable?: PageableResponse<Specialization>
+  specPageableRequest: PageableRequest
+
+  allSpecializations?: Specialization[]
 }
 
 const initialState: SpecializationsState = {
   isLoading: false,
-  specializations: undefined,
+  specPageable: undefined,
+  specPageableRequest: { size: 5, page: 0, sort: null },
+
+  allSpecializations: undefined,
 }
 
 export const getSpecializations = createAsyncThunk(
   'specializations',
+  async (request: PageableRequest) => {
+    const response = await apiService.getSpecializations(request)
+    return response
+  },
+)
+
+export const getAllSpecializations = createAsyncThunk(
+  'getAllSpecializations',
   async () => {
-    const response = await apiService.getSpecializations()
+    const response = await apiService.getAllSpecializations()
     return response
   },
 )
@@ -53,13 +68,21 @@ const specializationsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getSpecializations.pending, (state) => {
+      .addCase(getSpecializations.pending, (state, action) => {
         state.isLoading = true
+        state.specPageableRequest = action.meta.arg
       })
       .addCase(getSpecializations.fulfilled, (state, action) => {
-        state.specializations = action.payload
+        state.specPageable = action.payload
       })
       .addCase(getSpecializations.rejected, (state, action) => {})
+      .addCase(getAllSpecializations.pending, (state, action) => {
+        state.isLoading = true
+      })
+      .addCase(getAllSpecializations.fulfilled, (state, action) => {
+        state.allSpecializations = action.payload
+      })
+      .addCase(getAllSpecializations.rejected, (state, action) => {})
   },
 })
 

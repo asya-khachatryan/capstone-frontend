@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import apiService from '../api/service'
 
-export interface UserDTO {
+export interface User {
   firstName: string
   lastName: string
   email: string
@@ -10,9 +10,9 @@ export interface UserDTO {
   password?: string
 }
 
-export interface UserProfileDTO {
+export interface UserProfile {
   isAnonymous: boolean
-  user: UserDTO
+  user: User
 }
 
 export interface Credentials {
@@ -25,7 +25,7 @@ interface AuthState {
   error?: string
   isAuthenticated: boolean
   isRegistered: boolean
-  me?: UserDTO
+  me?: User
 }
 
 //when app starts, when mounting call getUser to know who is the person and isAuthenticated
@@ -73,7 +73,7 @@ export const register = createAsyncThunk(
     username,
     password,
   }: any) => {
-    const userDTO: UserDTO = {
+    const userDTO: User = {
       firstName,
       lastName,
       email,
@@ -87,17 +87,14 @@ export const register = createAsyncThunk(
   },
 )
 
-export const getCurrentUser = createAsyncThunk(
-  'auth/getCurrentUserAsync',
-  async () => {
-    const response = await apiService.getCurrentUser()
-    return response
-  },
-)
+export const getCurrentUser = createAsyncThunk('getCurrentUser', async () => {
+  const response = await apiService.getCurrentUser()
+  return response
+})
 
 export const updateUser = createAsyncThunk(
   'updateUser',
-  async (userDTO: UserDTO) => {
+  async (userDTO: User) => {
     return await apiService.updateUser(userDTO)
   },
 )
@@ -133,6 +130,7 @@ const authSlice = createSlice({
         state.isLoading = true
       })
       .addCase(getCurrentUser.fulfilled, (state, action) => {
+        console.log('its me' + action.payload.user.firstName)
         state.me = action.payload.user
         if (action.payload.isAnonymous === false) {
           state.isAuthenticated = true

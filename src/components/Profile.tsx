@@ -1,3 +1,4 @@
+import NavigationBar from '@components/Navbar'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import {
   Avatar,
@@ -7,49 +8,55 @@ import {
   Input,
   Typography,
 } from '@material-tailwind/react'
-import { UserDTO, getCurrentUser, updateUser } from '@redux/authSlice'
+import { User, getCurrentUser, updateUser } from '@redux/authSlice'
 import { useEffect, useState } from 'react'
 import { RootState } from 'store'
-import NavigationBar from '@components/Navbar'
 
 export function Profile() {
   const dispatch = useAppDispatch()
 
-  const me: UserDTO | undefined = useAppSelector(
+  const me: User | undefined = useAppSelector(
     (state: RootState) => state.auth.me,
   )
 
   const [editMode, setEditMode] = useState(false)
-
-  // State variables to store updated user information
   const [updatedInfo, setUpdatedInfo] = useState({
     firstName: me?.firstName || '',
     lastName: me?.lastName || '',
     email: me?.email || '',
     phoneNumber: me?.phoneNumber || '',
+    username: me?.username || '',
   })
 
   useEffect(() => {
-    dispatch(getCurrentUser())
-  }, [])
+    if (me === undefined) {
+      dispatch(getCurrentUser()).then(() =>
+        setUpdatedInfo({
+          firstName: me!.firstName,
+          lastName: me!.lastName,
+          email: me!.email,
+          phoneNumber: me!.phoneNumber,
+          username: me!.username!,
+        }),
+      )
+    }
+    console.log(me)
+    console.log(updatedInfo)
+  }, [me])
 
   const handleEditClick = () => {
-    // Toggle edit mode
     setEditMode(!editMode)
   }
 
   const handleSaveClick = () => {
-    // Dispatch an action to update user information
-    const user: UserDTO = {
+    const user: User = {
       ...updatedInfo,
     }
     dispatch(updateUser(user))
-    // Exit edit mode
     setEditMode(false)
   }
 
   const handleInputChange = (key: string, value: string) => {
-    // Update the state with the new input value
     setUpdatedInfo({
       ...updatedInfo,
       [key]: value,
@@ -68,7 +75,7 @@ export function Profile() {
             <div className="flex items-center gap-6">
               <Avatar
                 src="avatar.png"
-                alt="bruce-mars"
+                alt="avatar"
                 size="xl"
                 variant="rounded"
                 className="rounded-lg shadow-lg shadow-blue-gray-500/40"
@@ -76,12 +83,6 @@ export function Profile() {
               <div>
                 <Typography variant="h5" color="blue-gray" className="mb-1">
                   {me?.firstName + ' ' + me?.lastName}
-                </Typography>
-                <Typography
-                  variant="small"
-                  className="font-normal text-blue-gray-600"
-                >
-                  CEO / Co-Founder
                 </Typography>
               </div>
             </div>
@@ -113,13 +114,16 @@ export function Profile() {
                     </Typography>
                     <Input
                       size="lg"
-                      placeholder="Emma"
+                      placeholder="Asya"
                       labelProps={{
                         className: 'hidden',
                       }}
                       className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
                       disabled={!editMode}
-                      value={me?.firstName}
+                      value={updatedInfo?.firstName}
+                      onChange={(e) =>
+                        handleInputChange('firstName', e.target.value)
+                      }
                     />
                   </div>
                   <div className="w-full">
@@ -132,13 +136,16 @@ export function Profile() {
                     </Typography>
                     <Input
                       size="lg"
-                      placeholder="Roberts"
+                      placeholder="Khachatryan"
                       labelProps={{
                         className: 'hidden',
                       }}
                       className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
                       disabled={!editMode}
-                      value={me?.lastName}
+                      value={updatedInfo?.lastName}
+                      onChange={(e) =>
+                        handleInputChange('lastName', e.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -153,13 +160,16 @@ export function Profile() {
                     </Typography>
                     <Input
                       size="lg"
-                      placeholder="emma@mail.com"
+                      placeholder="asyakhachatryan1@gmail.com"
                       labelProps={{
                         className: 'hidden',
                       }}
                       className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
                       disabled={!editMode}
-                      value={me?.email}
+                      value={updatedInfo?.email}
+                      onChange={(e) =>
+                        handleInputChange('email', e.target.value)
+                      }
                     />
                   </div>
                   <div className="w-full">
@@ -172,13 +182,16 @@ export function Profile() {
                     </Typography>
                     <Input
                       size="lg"
-                      placeholder="+123 0123 456 789"
+                      placeholder="+374 99 123 456"
                       labelProps={{
                         className: 'hidden',
                       }}
                       className="w-full placeholder:opacity-100 focus:border-t-primary border-t-blue-gray-200"
                       disabled={!editMode}
-                      value={me?.phoneNumber}
+                      value={updatedInfo?.phoneNumber}
+                      onChange={(e) =>
+                        handleInputChange('phoneNumber', e.target.value)
+                      }
                     />
                   </div>
                 </div>

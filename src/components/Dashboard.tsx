@@ -13,23 +13,22 @@ import {
 } from '@material-tailwind/react'
 import { Talent, searchInterviewees, searchTalents } from '@redux/talentSlice'
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { PageableResponse } from 'services/types'
+import { PageableRequest, PageableResponse } from 'services/types'
 import { RootState } from '../store'
 import ApplicationPage from './ApplicationPage'
-import InterviewTabContent from './InterviewTabContent'
+import InterviewPage from './InterviewPage'
 import NavigationBar from './Navbar'
-import OnboardingTabContent from './OnboardingTabContent'
+import OnboardingPage from './OnboardingPage'
+import { searchMentees } from '@redux/onboardingSlice'
 
 const tabs: { name: string; content: React.ReactNode }[] = [
   { name: 'Application', content: <ApplicationPage /> },
-  { name: 'Interview', content: <InterviewTabContent /> },
-  { name: 'Onboarding', content: <OnboardingTabContent /> },
+  { name: 'Interview', content: <InterviewPage /> },
+  { name: 'Onboarding', content: <OnboardingPage /> },
 ]
 
 const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch()
-  const navigate = useNavigate()
 
   const [activeTab, setActiveTab] = useState(0)
 
@@ -40,10 +39,9 @@ const Dashboard: React.FC = () => {
   const talentsPageable: PageableResponse<Talent> | undefined = useAppSelector(
     (state: RootState) => state.talent.talentsPageable,
   )
-
-  const handlePrevious = () => {}
-
-  const handleNext = () => {}
+  const talentsPageableRequest: PageableRequest | undefined = useAppSelector(
+    (state: RootState) => state.talent.talentsPageableRequest,
+  )
 
   return (
     <>
@@ -100,6 +98,8 @@ const Dashboard: React.FC = () => {
                     dispatch(searchTalents(e.target.value))
                   } else if (activeTab === 1) {
                     dispatch(searchInterviewees(e.target.value))
+                  } else if (activeTab === 2) {
+                    dispatch(searchMentees(e.target.value))
                   }
                 }}
               />
@@ -110,34 +110,6 @@ const Dashboard: React.FC = () => {
         <div className="tab-content overflow-visible">
           {tabs[activeTab].content}
         </div>
-
-        <CardFooter
-          className="flex items-center justify-between border-t border-blue-gray-50 p-4"
-          placeholder={undefined}
-        >
-          <Typography
-            variant="small"
-            color="blue-gray"
-            className="font-normal"
-            placeholder={undefined}
-          >
-            Page {(talentsPageable?.number ?? 0) + 1} of{' '}
-            {talentsPageable?.totalPages}
-          </Typography>
-          <div className="flex gap-2">
-            {!talentsPageable?.first && (
-              <Button variant="outlined" size="sm" placeholder={undefined}>
-                Previous
-              </Button>
-            )}
-
-            {!talentsPageable?.last && (
-              <Button variant="outlined" size="sm" placeholder={undefined}>
-                Next
-              </Button>
-            )}
-          </div>
-        </CardFooter>
       </Card>
     </>
   )

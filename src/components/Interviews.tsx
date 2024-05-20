@@ -14,7 +14,11 @@ import {
   Tooltip,
   Typography,
 } from '@material-tailwind/react'
-import { Interview, getAllInterviews } from '@redux/interviewSlice'
+import {
+  Interview,
+  getAllInterviews,
+  submitFeedback,
+} from '@redux/interviewSlice'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { RootState } from 'store'
@@ -36,6 +40,8 @@ const dateFormat = 'YYYY-MM-DD HH:mm:ss'
 const Interviews: React.FC = () => {
   const [addFeedbackModalOpen, setAddFeedbackModalOpen] = useState(false)
   const [editFeedbackModalOpen, setEditFeedbackModalOpen] = useState(false)
+  const [interviewId, setInterviewId] = useState<number>(0)
+  const [feedback, setFeedback] = useState<string>('')
 
   const dispatch = useAppDispatch()
   const interviews: Interview[] | undefined = useAppSelector(
@@ -47,6 +53,23 @@ const Interviews: React.FC = () => {
       dispatch(getAllInterviews())
     }
   }, [interviews])
+
+  const handleSubmitFeedback = () => {
+    dispatch(submitFeedback({ interviewId, feedback })).then(() =>
+      setAddFeedbackModalOpen(false),
+    )
+  }
+
+  const handleAddFeedbackButtonClick = (id: number) => {
+    setInterviewId(id)
+    setAddFeedbackModalOpen(true)
+  }
+
+  const handleEditFeedbackButtonClick = (id: number, feedback: string) => {
+    setFeedback(feedback)
+    setInterviewId(id)
+    setEditFeedbackModalOpen(true)
+  }
 
   return (
     <>
@@ -95,6 +118,7 @@ const Interviews: React.FC = () => {
               {interviews?.map(
                 (
                   {
+                    id,
                     talent,
                     interviewers,
                     interviewStatus,
@@ -111,7 +135,7 @@ const Interviews: React.FC = () => {
                     : 'p-4 border-b border-blue-gray-50'
 
                   return (
-                    <tr key={talent.name}>
+                    <tr key={id}>
                       <td className={classes}>
                         <div className="flex items-center gap-3">
                           <div className="flex flex-col">
@@ -226,12 +250,18 @@ const Interviews: React.FC = () => {
                                 color="blue-gray"
                                 className="font-normal"
                               >
-                                {interviewFeedback.feedback}
+                                {interviewFeedback}
                               </Typography>
                               <Tooltip content="Edit Feedback">
                                 <IconButton
                                   variant="text"
                                   placeholder={undefined}
+                                  onClick={() =>
+                                    handleEditFeedbackButtonClick(
+                                      id!,
+                                      interviewFeedback,
+                                    )
+                                  }
                                 >
                                   <PencilIcon className="h-4 w-4" />
                                 </IconButton>
@@ -241,7 +271,7 @@ const Interviews: React.FC = () => {
                             <Button
                               variant="outlined"
                               size="sm"
-                              onClick={() => setAddFeedbackModalOpen(true)}
+                              onClick={() => handleAddFeedbackButtonClick(id!)}
                             >
                               Add feedback
                             </Button>
@@ -275,8 +305,30 @@ const Interviews: React.FC = () => {
           cancelButtonLabel="Cancel"
           cancelButtonAction={() => setAddFeedbackModalOpen(false)}
           submitButtonLabel="Save"
-          submitButtonAction={() => setAddFeedbackModalOpen(false)}
-          children={<Textarea label="Feedback" />}
+          submitButtonAction={() => handleSubmitFeedback()}
+          children={
+            <Textarea
+              label="Feedback"
+              onChange={(e) => setFeedback(e.target.value)}
+            />
+          }
+          size="lg"
+        />
+      )}
+      {editFeedbackModalOpen && (
+        <Modal
+          title="Edit feedback"
+          cancelButtonLabel="Cancel"
+          cancelButtonAction={() => setEditFeedbackModalOpen(false)}
+          submitButtonLabel="Update"
+          submitButtonAction={() => handleSubmitFeedback()}
+          children={
+            <Textarea
+              label="Feedback"
+              onChange={(e) => setFeedback(e.target.value)}
+              value={feedback}
+            />
+          }
           size="lg"
         />
       )}

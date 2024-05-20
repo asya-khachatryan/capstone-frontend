@@ -36,9 +36,7 @@ const SpecializationModal: React.FC<ModalProps> = ({
   const [specializationName, setSpecializationName] = useState(
     isEdit ? specialization?.specializationName || '' : '',
   )
-  const [active, setActive] = useState(
-    isEdit ? specialization?.active || true : true,
-  )
+  const [active, setActive] = useState(isEdit ? specialization!.active : true)
 
   const handleOpen = (value: any) => (size = value)
 
@@ -111,26 +109,29 @@ const SpecializationModal: React.FC<ModalProps> = ({
               />
             </div>
             <div className="w-full">
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="mb-2 font-medium"
-              >
-                Status
-              </Typography>
-              <Switch
-                id="custom-switch-component"
-                ripple={false}
-                className="h-full w-full checked:bg-[#2ec946]"
-                containerProps={{
-                  className: 'w-11 h-6',
-                }}
-                circleProps={{
-                  className: 'before:hidden left-0.5 border-none',
-                }}
-                defaultChecked={!isEdit || active}
-                // onChange={(e) => setActive(e.)}
-              />
+              <div className="flex flex-col items-center justify-center h-full">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="mb-2 font-medium"
+                >
+                  Status
+                </Typography>
+                <Switch
+                  id="custom-switch-component"
+                  ripple={false}
+                  className="h-full w-full checked:bg-[#2ec946]"
+                  containerProps={{
+                    className: 'w-16 h-8',
+                  }}
+                  circleProps={{
+                    className:
+                      'before:hidden left-0.5 right-0.5 border-none w-7 h-7',
+                  }}
+                  defaultChecked={!isEdit || active}
+                  onChange={(e) => setActive(e.target.checked)}
+                />
+              </div>
             </div>
           </div>
         </DialogBody>
